@@ -227,7 +227,7 @@ int main(int, char**)
             std::exception *d;
             int64_t a, b;
           //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
-            ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
+          //  ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
                 // Create a window called "Hello, world!" and append into it.
                 ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
                 ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
@@ -284,23 +284,33 @@ int main(int, char**)
                    // WriteConfigJE << "fJEVsync=false;" << std::endl;
                 }
               
-                    ImGui::Text(("SYSTEM-Z 0.1" + fTime).c_str());
+                    ImGui::Begin("Main Info");
+                    ImGui::Text(("SYSTEM-Z 0.2 " + fTime).c_str());
+                    ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
+                    ImGui::SetWindowSize(ImVec2(475.0f, 103.0f));
                     ImGui::Text(("CPU:" + dCPUBrandString).c_str());
                     ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
                     ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+                    ImGui::End();
+                    ImGui::Begin("Perfomance Info");
+                    ImGui::SetWindowPos(ImVec2(6.0f, 127.0f));
+                    ImGui::SetWindowSize(ImVec2(475.0f, 303.0f));
                     ImGui::Text(("Commit Limit:" + (fCommitLimit)).c_str());
                     ImGui::Text(("Commit Peak:" + (fCommitPeak)).c_str());
                     ImGui::Text(("Commit Total:" + (fCommitTotal)).c_str());
                     ImGui::Text(("Kernel Non paged:" + (fKernelNonpaged)).c_str());
                     ImGui::Text(("Kernel Paged:" + (fKernelPaged)).c_str());
-                    ImGui::Text(("Kernel Total:" + (fD_gpuGLVer)).c_str());
+                    ImGui::Text(("Kernel Total:" + (fKernelTotal)).c_str());
                     ImGui::Text(("Page Size:" + (fPageSize)).c_str());
                     ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
                     ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
                     ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
                     ImGui::Text(("System Cache:" + (fSystemCache)).c_str());
                     ImGui::Text(("Thread Count:" + (fThreadCount)).c_str());
-                    ImGui::Text("Memory");
+                    ImGui::End();
+                    ImGui::Begin("Memory");
+                    ImGui::SetWindowPos(ImVec2(6.0f, 437.0f));
+                    ImGui::SetWindowSize(ImVec2(475.0f, 203.0f));
                     ImGui::Text(("dw Len:" + (fdwLenA)).c_str());
                     ImGui::Text(("dw Memory Load:" + (fdwMemoryLoad)).c_str());
                     ImGui::Text(("Avail Extended Virtual:" + (fullAvailExtendedVirtual)).c_str());
@@ -311,6 +321,7 @@ int main(int, char**)
                     ImGui::Text(("Total Phys:" + (fullTotalPhys)).c_str());
                     ImGui::Text(("Total Virtual:" + (fullTotalVirtual)).c_str());
                     ImGui::End();
+                   // ImGui::End();
         
         // Rendering
       ImGui::Render();
