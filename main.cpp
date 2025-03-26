@@ -21,85 +21,141 @@
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "cpudata.h"
+#include "imgui_internal.h"
 //#include "Colors.h"
+
 #pragma comment (lib , "Urlmon.lib")
-uint64_t fDataMemUsage() // Work Function !!! Check Sym RAM to Current Program //
-{
-    PROCESS_MEMORY_COUNTERS pmc;
-    pmc.cb = sizeof(pmc);
-    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-    return pmc.WorkingSetSize;
-}
 
 #pragma once
+namespace ImGui {
+    bool Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
 
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
 
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size((radius) * 2, (radius + style.FramePadding.y) * 2);
+
+        const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+        ItemSize(bb, style.FramePadding.y);
+        if (!ItemAdd(bb, id))
+            return false;
+
+        // Render
+        window->DrawList->PathClear();
+
+        int num_segments = 30;
+        int start = abs(ImSin(g.Time * 1.8f) * (num_segments - 5));
+
+        const float a_min = IM_PI * 2.0f * ((float)start) / (float)num_segments;
+        const float a_max = IM_PI * 2.0f * ((float)num_segments - 3) / (float)num_segments;
+
+        const ImVec2 centre = ImVec2(pos.x + radius, pos.y + radius + style.FramePadding.y);
+
+        for (int i = 0; i < num_segments; i++) {
+            const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+            window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a + g.Time * 8) * radius,
+                centre.y + ImSin(a + g.Time * 8) * radius));
+        }
+
+        window->DrawList->PathStroke(color, false, thickness);
+    }
+}
 struct PerfomanceData {
-    int64_t CommitLimit = fPerfomanceInfo(1);
-    int64_t CommitPeak = fPerfomanceInfo(2);
-    int64_t CommitTotal = fPerfomanceInfo(3);
-    int64_t KernelNonpaged = fPerfomanceInfo(4);
-    int64_t KernelPaged = fPerfomanceInfo(5);
-    int64_t KernelTotal = fPerfomanceInfo(6);
-    int64_t PageSize = fPerfomanceInfo(7);
-    int64_t PhysicalAvailable = fPerfomanceInfo(8);
-    int64_t PhysicalTotal = fPerfomanceInfo(9);
+    int64_t CommitLimit = (fPerfomanceInfo(1));
+    int64_t CommitPeak = (fPerfomanceInfo(2));
+    int64_t CommitTotal = (fPerfomanceInfo(3));
+    int64_t KernelNonpaged = (fPerfomanceInfo(4));
+    int64_t KernelPaged = (fPerfomanceInfo(5));
+    int64_t KernelTotal = (fPerfomanceInfo(6)) ;
+    int64_t PageSize = (fPerfomanceInfo(7)) ;
+    int64_t PhysicalAvailable = (fPerfomanceInfo(8)) ;
+    int64_t PhysicalTotal = (fPerfomanceInfo(9)) ;
     int64_t ProcessCount = fPerfomanceInfo(10);
-    int64_t SystemCache = fPerfomanceInfo(11);
+    int64_t SystemCache = (fPerfomanceInfo(11));
     int64_t ThreadCount = fPerfomanceInfo(12);
 };
+
+class cpudata {
+public:
+    std::nano cpu_load;
+    std::string fNUMANodes = std::to_string(dDataCPU(1));
+    std::string fPhysNumberPackages = std::to_string(dDataCPU(2));
+    std::string fCPUCores = std::to_string(dDataCPU(3));
+    std::string fCPULogicalCores = std::to_string(dDataCPU(4));
+    std::string fL1CacheSize = std::to_string(dDataCPU(5));
+    std::string fL2CacheSize = std::to_string(dDataCPU(6));
+    std::string fL3CacheSize = std::to_string(dDataCPU(7));
+    std::string fCPULoadPercent;
+};
 struct MemoryData {
-    int64_t dwLenA = fMemStatus(0);
-    int64_t dwMemoryLoad = fMemStatus(1);
-    int64_t ullAvailExtendedVirtual = fMemStatus(2);
-    int64_t ullAvailPageFile = fMemStatus(3);
-    int64_t ullAvailPhys = fMemStatus(4);
-    int64_t ullAvailVirtual = fMemStatus(5);
-    int64_t ullTotalPageFile = fMemStatus(6);
-    int64_t ullTotalPhys = fMemStatus(7);
+    int64_t dwLenA = (fMemStatus(0));
+    int64_t dwMemoryLoad = (fMemStatus(1));
+    int64_t ullAvailExtendedVirtual = (fMemStatus(2));
+    int64_t ullAvailPageFile = (fMemStatus(3));
+    int64_t ullAvailPhys = (fMemStatus(4)) ;
+    int64_t ullAvailVirtual = (fMemStatus(5)) ;
+    int64_t ullTotalPageFile = (fMemStatus(6));
+    int64_t ullTotalPhys = (fMemStatus(7));
     int64_t ullTotalVirtual = fMemStatus(8);
 };
-struct TimeOffset {
-    int64_t Hour = fLTime(0);
-    int64_t Min = fLTime(1);
-    int64_t Sec = fLTime(2);
-};
-
-   static int64_t int2str(int64_t integerData ,std::string *fM_bufferArrayStr) {
-        *fM_bufferArrayStr =  std::to_string(integerData);
+typedef double long float64_t;
+class strData {
+   // static int64_t int642str(int64_t integerData, std::string* fM_bufferArrayStr);
+   // static int64_t const_char2str(const char* Data, std::string* fM_bufferArrayStr);
+public:
+    static int64_t int642str(int64_t integerData, std::string *fM_bufferArrayStr) {
+        *fM_bufferArrayStr = (std::to_string(integerData)).c_str();
         return 1;
     }
+    static int64_t const_char2str(const char* Data, std::string* fM_bufferArrayStr) {
+        *fM_bufferArrayStr = Data;
+        return 1;
+    }
+};
 // Simple helper function to load an image into a OpenGL texture with common settings
 
 PerfomanceData sInfo;
 MemoryData mInfo;
-TimeOffset tInfo;
+strData ByteTransfer;
+cpudata *CPU = new cpudata;
+//
+std::string strArray;
+//fA_int2str(sInfo.CommitLimit,&strArray);
 //
 //
-static std::string fCommitLimit = std::to_string(sInfo.CommitLimit);
-static std::string fCommitPeak = std::to_string(sInfo.CommitPeak);
-static std::string fCommitTotal = std::to_string(sInfo.CommitTotal);
-static std::string fKernelNonpaged = std::to_string(sInfo.KernelNonpaged);
-static std::string fKernelPaged = std::to_string(sInfo.KernelPaged);
-static std::string fKernelTotal = std::to_string(sInfo.KernelTotal);
-static std::string fPageSize = std::to_string(sInfo.PageSize);
-static std::string fPhysicalAvailable = std::to_string(sInfo.PhysicalAvailable);
-static std::string fPhysicalTotal = std::to_string(sInfo.PhysicalTotal);
+float64_t g = 0;
+static std::string fCommitLimit = std::to_string((int64_t)sInfo.CommitLimit)+ " Bytes";
+static std::string fCommitPeak = std::to_string((int64_t)sInfo.CommitPeak)+ " Bytes";
+static std::string fCommitTotal = std::to_string((int64_t)sInfo.CommitTotal)+ " Bytes";
+static std::string fKernelNonpaged = std::to_string((int64_t)sInfo.KernelNonpaged)+ " Bytes";
+static std::string fKernelPaged = std::to_string((int64_t)sInfo.KernelPaged)+ " Bytes";
+static std::string fKernelTotal = std::to_string((int64_t)sInfo.KernelTotal)+ " Bytes";
+static std::string fPageSize = std::to_string((int64_t)sInfo.PageSize)+ " Bytes";
+static std::string fPhysicalAvailable = std::to_string((int64_t)sInfo.PhysicalAvailable)+ " Bytes";
+static std::string fPhysicalTotal = std::to_string((int64_t)sInfo.PhysicalTotal)+ " Bytes";
 static std::string fProcessCount = std::to_string(sInfo.ProcessCount);
-static std::string fSystemCache = std::to_string(sInfo.SystemCache);
+static std::string fSystemCache = std::to_string((int64_t)sInfo.SystemCache)+ " Bytes";
 static std::string fThreadCount = std::to_string(sInfo.ThreadCount);
 // 
-static std::string fdwLenA = std::to_string(mInfo.dwLenA);
-static std::string fdwMemoryLoad = std::to_string(mInfo.dwMemoryLoad);
-static std::string fullAvailExtendedVirtual = std::to_string(mInfo.ullAvailExtendedVirtual);
-static std::string fullAvailPageFile = std::to_string(mInfo.ullAvailPageFile);
-static std::string fullAvailPhys = std::to_string(mInfo.ullAvailPhys);
-static std::string fullAvailVirtual = std::to_string(mInfo.ullAvailVirtual);
-static std::string fullTotalPageFile = std::to_string(mInfo.ullTotalPageFile);
-static std::string fullTotalPhys = std::to_string(mInfo.ullTotalPhys);
-static std::string fullTotalVirtual = std::to_string(mInfo.ullTotalVirtual);
+static std::string fdwLenA = std::to_string((int64_t)mInfo.dwLenA);
+static std::string fdwMemoryLoad = (std::to_string((int64_t)mInfo.dwMemoryLoad) + "%%").c_str();
+static std::string fGBMemoryLoad = std::to_string(fMemStatus(7) - fMemStatus(4)) + " GB";
+static std::string fullAvailExtendedVirtual = std::to_string((int64_t)mInfo.ullAvailExtendedVirtual) + " GB";
+static std::string fullAvailPageFile = std::to_string((int64_t)sInfo.CommitLimit - (int64_t)sInfo.CommitTotal) + "GB";
+static std::string fullAvailPhys = std::to_string((int64_t)mInfo.ullAvailPhys) + "GB";
+static std::string fullAvailVirtual = std::to_string((int64_t)mInfo.ullAvailVirtual) + "GB";
+static std::string fullTotalPageFile = std::to_string((int64_t)mInfo.ullTotalPageFile) + "GB";
+static std::string fullTotalPhys = std::to_string((int64_t)mInfo.ullTotalPhys) + "GB";
+static std::string fullTotalVirtual = std::to_string((int64_t)mInfo.ullTotalVirtual) + "GB";
+
 //
-static std::string fTime = (std::to_string(tInfo.Hour) + ":" + std::to_string(tInfo.Min) + ":" + std::to_string(tInfo.Sec));
+//static std::string fTime = (std::to_string(tInfo.Hour) + ":" + std::to_string(tInfo.Min) + ":" + std::to_string(tInfo.Sec));
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
 
@@ -119,17 +175,20 @@ void ResetDeviceWGL();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-int main(int, char**)
+int main(int, char** argv)
 {
-    
+    //ByteTransfer.int2str(123, &strArray);
+    ByteTransfer.int642str(13, &strArray);
+    g = 1,3333;
+    std::cout << "Test float64_t size:" << sizeof(float64_t) <<"data_test:"<<g << std::endl;
     ImDrawListSplitter JEApp;
-    
-     char fInputBuffer;
-    ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"System-Z 0.1 OpenGL3.3", nullptr };
-    ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"System-Z 0.1 OpenGL3.3", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW |  WS_EX_NOPARENTNOTIFY, 100, 80, 500, 800, nullptr, nullptr, wc.hInstance, nullptr);
 
+    char fInputBuffer;
+    ImGui_ImplWin32_EnableDpiAwareness();
+    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"System-Z 1.0(release) OpenGL3.3", nullptr };
+    ::RegisterClassExW(&wc);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"System-Z 1.0(release) OpenGL3.3", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW | WS_EX_NOPARENTNOTIFY, 100, 80, 500, 900, nullptr, nullptr, wc.hInstance, nullptr);
+    ::SetWindowLongA(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SIZEBOX);
     // Initialize OpenGL
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
     {
@@ -158,24 +217,26 @@ int main(int, char**)
 
     ImGui_ImplWin32_InitForOpenGL(hwnd);
     ImGui_ImplOpenGL3_Init();
-        io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 15.0f);//
+    io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
+    ImFont* font40 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
+    ImFont* font60 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 60.0f);
     std::cout << "[JE_ENGINE] Loaded Font WhiteRabbit.ttf" << std::endl;
     struct GPU_DATA {
         std::string E_Brand = (const char*)glGetString(GL_VENDOR);
         std::string E_Model = (const char*)glGetString(GL_RENDERER);
         std::string E_GLVer = (const char*)glGetString(GL_VERSION);
     };
-    GPU_DATA GPU;
-    std::string fD_gpuBrand = GPU.E_Brand;
-    std::string fD_gpuModel = GPU.E_Model;
-    std::string fD_gpuGLVer = GPU.E_GLVer;
+    GPU_DATA *GPU = new GPU_DATA;
+    std::string fD_gpuBrand = GPU->E_Brand;
+    std::string fD_gpuModel = GPU->E_Model;
+    std::string fD_gpuGLVer = GPU->E_GLVer;
     std::cout << "[JE_ENGINE] OpenGL Driver Loaded" << std::endl;
     //SetColorAMD64(240);
     std::cout << "" << std::endl;
     std::cout << "" << "OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
     std::cout << "" << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "" << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
-   // std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+    // std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "" << std::endl;
     int CPUInfo[4] = { -1 };
     unsigned   nExIds, i = 0;
@@ -196,6 +257,7 @@ int main(int, char**)
     }
     std::string dCPUBrandString = CPUBrandString;
     // Main loop
+    bool main_logo = true;
     bool done = false;
     std::cout << "[JE_ENGINE] Main Frame Loaded!!" << std::endl;
     while (!done)
@@ -210,11 +272,11 @@ int main(int, char**)
             ::DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
                 exit(0);
-              //  done = true;
+            //  done = true;
             if (msg.message == WM_DESTROY)
                 exit(0);
         }
-        
+
         if (done)
             break;
         // Start the Dear ImGui frame
@@ -223,108 +285,191 @@ int main(int, char**)
         ImGui::NewFrame();
         {
             bool fJEFrame = true;
-           // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
-            std::exception *d;
+            // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
+            std::exception* d;
             int64_t a, b;
-          //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
-          //  ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
-                // Create a window called "Hello, world!" and append into it.
-                ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
-                ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
+            //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
+            //  ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
+                  // Create a window called "Hello, world!" and append into it.
+            ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
+            ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
+            JEApp.ClearFreeMemory();
+            ImGuiStyle& style = ImGui::GetStyle();
+            style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
+            style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+            style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
+            style.Colors[ImGuiCol_Border] = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
+            style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+            style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
+            style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
+            style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
+            style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 0.80f);
+            style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
+            style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
+            style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.55f, 0.53f, 0.55f, 0.51f);
+            style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
+            style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
+            style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
+            style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
+            style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
+            style.Colors[ImGuiCol_Button] = ImVec4(0.30f, 0.30f, 0.30f, 0.80f);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
+            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
+            style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
+            style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
+            style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
+            style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
+            style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
+            style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+            style.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+            style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
+            ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
+
+        }
+
+        bool b_vsync = true;
+        if (argv[1] == "vsync=true") {
+            b_vsync = true;
+        }
+        if (argv[1] == "vsync=false") {
+            b_vsync = true;
+        }
+        //struct TimeOffset {
+        int64_t Hour = fLTime(0);
+        int64_t Min = fLTime(1);
+        int64_t Sec = fLTime(2);
+        // };
+
+         //TimeOffset tInfo;
+        static std::string fTime = (std::to_string(Hour) + ":" + std::to_string(Min) + ":" + std::to_string(Sec));
+        JEApp.ClearFreeMemory();
+        if (b_vsync) {
+            Sleep(13);
+            // WriteConfigJE << "fJEVsync=true;" << std::endl;
+        }
+        else {
+            Sleep(0);
+            // WriteConfigJE << "fJEVsync=false;" << std::endl;
+        }
+        bool bSwitchBool = true;
+       static  bool loadingWindow = false;
+       static int64_t uLoad = 0;
+       static int64_t uLexit = 0;
+       static bool exitWindow = false;
+       ImU32 col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
+        if (bSwitchBool) {
+            if (main_logo) {
                 JEApp.ClearFreeMemory();
-                    ImGuiStyle& style = ImGui::GetStyle();
-                    style.ButtonTextAlign = ImVec2(0.2f, 0.5f);
-                    style.WindowRounding = 5.3f;
-                    style.FrameRounding = 2.3f;
-                    style.ScrollbarRounding = 0;
-                    style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-                    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.106f, 0.106f, 0.118f, 0.80f);
-                    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-                    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-                    style.Colors[ImGuiCol_Border] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-                    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-                    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.16f, 0.1f, 0.1f, 0.1f);
-                    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
-                    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
-                    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.004f, 0.016f, 0.035f, 1.0f);
-                    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
-                    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
-                    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.91f);
-                    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
-                    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
-                    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
-                    style.Colors[ImGuiCol_Button] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-                    style.Colors[ImGuiCol_ButtonActive] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_Header] = ImVec4(0.004f, 0.016f, 0.035f, 1.0f);
-                    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_HeaderActive] = ImVec4(1.0f, 0.0f, 0.33f, 0.90f);
-                    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.85f);
-                    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(1.00f, 1.00f, 1.00f, 0.60f);
-                    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
-                    style.Colors[ImGuiCol_PlotLines] = ImVec4(1.0f, 0.20f, 0.373f, 1.0f);
-                    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.0f, 0.20f, 0.373f, 0.90f);
-                    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-                    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-                    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-                    ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
-                    
+                ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+                ImGui::SetWindowSize(ImVec2(498.0f, 898.0f));
+                ImGui::SetWindowPos(ImVec2(-2, 1));
+                ImGui::SetCursorPos(ImVec2(103, 179));
+                ImGui::PushFont(font60);
+                ImGui::Text("SYSTEM-Z 1.0");
+                ImGui::PopFont();
+                if (!loadingWindow) {
+                    if (!exitWindow)
+                    {
+                        ImGui::SetCursorPosX(133);
+                        ImGui::Text("System Hardware info Test");
+                        ImGui::SetCursorPosX(133);
+                        ImGui::Text("Writtein to C++20 x64");
+                        ImGui::SetCursorPosX(133);
+                        ImGui::Text("Backend API: OpenGL3.3");
+                        ImGui::SetCursorPosX(133);
+                        ImGui::Text("Created by HCPP");
+                        ImGui::SetCursorPosX(133);
+                        if (ImGui::Button("START", ImVec2(150.0f, 30.0f))) {
+                            loadingWindow = true;
+                        }
+                    }
                 }
-         bool b_vsync = true;
-                JEApp.ClearFreeMemory();
-                if (b_vsync) {
-                    Sleep(13);
-                   // WriteConfigJE << "fJEVsync=true;" << std::endl;
+                if (exitWindow) {
+                    loadingWindow = false;
+                    main_logo = true;
+                    uLexit++;
+                    ImGui::SetCursorPos(ImVec2(103, 229));
+                    ImGui::PushFont(font60);
+                    ImGui::Text("Exiting..");
+                    ImGui::PopFont();
+                    ImGui::SetCursorPos(ImVec2(233, 299));
+                    ImGui::Spinner("Loading data", 20, 4, col);
+                    if (uLexit == 100) {
+                        exit(0);
+                    }
                 }
-                else {
-                    Sleep(0);
-                   // WriteConfigJE << "fJEVsync=false;" << std::endl;
+                if (loadingWindow) {
+   
+                    uLoad++;
+                    ImGui::SetCursorPos(ImVec2(233, 269));
+                    ImGui::Spinner("Loading data", 20, 4, col);
+                        if (uLoad == 100) {
+                            main_logo = false;
+                            loadingWindow = false;
+                        }
                 }
-              
-                    ImGui::Begin("Main Info");
-                    ImGui::Text(("SYSTEM-Z 0.2 " + fTime).c_str());
-                    ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
-                    ImGui::SetWindowSize(ImVec2(475.0f, 103.0f));
-                    ImGui::Text(("CPU:" + dCPUBrandString).c_str());
-                    ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
-                    ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
-                    ImGui::End();
-                    ImGui::Begin("Perfomance Info");
-                    ImGui::SetWindowPos(ImVec2(6.0f, 127.0f));
-                    ImGui::SetWindowSize(ImVec2(475.0f, 303.0f));
-                    ImGui::Text(("Commit Limit:" + (fCommitLimit)).c_str());
-                    ImGui::Text(("Commit Peak:" + (fCommitPeak)).c_str());
-                    ImGui::Text(("Commit Total:" + (fCommitTotal)).c_str());
-                    ImGui::Text(("Kernel Non paged:" + (fKernelNonpaged)).c_str());
-                    ImGui::Text(("Kernel Paged:" + (fKernelPaged)).c_str());
-                    ImGui::Text(("Kernel Total:" + (fKernelTotal)).c_str());
-                    ImGui::Text(("Page Size:" + (fPageSize)).c_str());
-                    ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
-                    ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
-                    ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
-                    ImGui::Text(("System Cache:" + (fSystemCache)).c_str());
-                    ImGui::Text(("Thread Count:" + (fThreadCount)).c_str());
-                    ImGui::End();
-                    ImGui::Begin("Memory");
-                    ImGui::SetWindowPos(ImVec2(6.0f, 437.0f));
-                    ImGui::SetWindowSize(ImVec2(475.0f, 203.0f));
-                    ImGui::Text(("dw Len:" + (fdwLenA)).c_str());
-                    ImGui::Text(("dw Memory Load:" + (fdwMemoryLoad)).c_str());
-                    ImGui::Text(("Avail Extended Virtual:" + (fullAvailExtendedVirtual)).c_str());
-                    ImGui::Text(("Avail Page File:" + (fullAvailPageFile)).c_str());
-                    ImGui::Text(("Avail Phys:" + (fullAvailPhys)).c_str());
-                    ImGui::Text(("Avail Virtual:" + (fullAvailVirtual)).c_str());
-                    ImGui::Text(("Total Page File:" + (fullTotalPageFile)).c_str());
-                    ImGui::Text(("Total Phys:" + (fullTotalPhys)).c_str());
-                    ImGui::Text(("Total Virtual:" + (fullTotalVirtual)).c_str());
-                    ImGui::End();
-                   // ImGui::End();
-        
-        // Rendering
-      ImGui::Render();
+            
+            ImGui::End();
+        }
+        if (!main_logo) {
+            loadingWindow = false;
+            JEApp.ClearFreeMemory();
+            ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+            ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024)) + ": MB").c_str());
+            ImGui::SameLine();
+            if (!exitWindow) {
+            if (ImGui::Button("Crash", ImVec2(150.0f, 30.0f))) {
+                exitWindow = true;
+                main_logo = true;
+                
+            }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("BACK", ImVec2(150.0f, 30.0f))) {
+                main_logo = true;
+                uLoad = 0;
+            }
+            ImGui::SetWindowPos(ImVec2(-3, -2));
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: CPU INFO :::");
+            ImGui::Text(("CPU:" + dCPUBrandString).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: GPU :::");
+            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
+            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: PERFOMANCE INFO :::");
+            ImGui::Text(("Commit Limit:" + (fCommitLimit)).c_str());
+            ImGui::Text(("Commit Peak:" + (fCommitPeak)).c_str());
+            ImGui::Text(("Commit Total:" + (fCommitTotal)).c_str());
+            ImGui::Text(("Kernel Non paged:" + (fKernelNonpaged)).c_str());
+            ImGui::Text(("Kernel Paged:" + (fKernelPaged)).c_str());
+            ImGui::Text(("Kernel Total:" + (fKernelTotal)).c_str());
+            ImGui::Text(("Page Size:" + (fPageSize)).c_str());
+            ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
+            ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
+            ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
+            ImGui::Text(("System Cache:" + (fSystemCache)).c_str());
+            ImGui::Text(("Thread Count:" + (fThreadCount)).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: MEMORY INFO :::");
+            ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
+            ImGui::Text(("Free Memory:" + (fullAvailPhys)).c_str());
+            ImGui::Text(("Total Memory:" + (fullTotalPhys)).c_str());
+            ImGui::End();
+            }
+       }
+       // ImGui::End();
+
+// Rendering
+        ImGui::Render();
         glViewport(0, 0, 400, 800);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
