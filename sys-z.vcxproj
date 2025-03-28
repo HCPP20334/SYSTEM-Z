@@ -148,6 +148,8 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <Version>0.2</Version>
+      <GenerateWindowsMetadata>true</GenerateWindowsMetadata>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -175,6 +177,9 @@
   <ItemGroup>
     <None Include="..\..\misc\natvis\imgui.natvis" />
     <None Include="..\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Значок.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

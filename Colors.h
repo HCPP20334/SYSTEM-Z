@@ -1,7 +1,4 @@
 //Colors C++ for console by HCPP20334
-#pragma comment( lib,"psapi.lib")
-#pragma comment( lib,"Xinput.lib")
-#pragma comment( lib,"gdi32.lib")
 #include<iostream>
 #include <windows.h>
 #include <Wincon.h>
@@ -9,7 +6,7 @@
 
 using namespace std;
 
-void cls( HANDLE hConsole )
+void Acls( HANDLE hConsole )
 {
    COORD coordScreen = { 0, 0 };    // home for the cursor 
     SetConsoleCursorPosition(hConsole, coordScreen);
@@ -28,7 +25,7 @@ enum ConsoleColor
 	Yellow      =14,
 	Lightgreen  =10
 };
-int64_t SetFontA(const wchar_t* fNameFont , int64_t fSizeFontX , int64_t fSizeFontY)
+int64_t ASetFontA(const wchar_t* fNameFont , int64_t fSizeFontX , int64_t fSizeFontY)
 {
 HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_FONT_INFOEX fFontInfo;
@@ -84,7 +81,7 @@ string  SetColorAMD64(int64_t text)
 	return bVersion;
 }
 #endif
-bool ConsoleFullScreen(HWND bConsoleD , int sizeWindow)
+bool AConsoleFullScreen(HWND bConsoleD , int sizeWindow)
 {
 	//HWND "Handle Console window" = GetConsoleWindows(); 
 	bConsoleD = GetConsoleWindow();//Handle Window

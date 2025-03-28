@@ -24,7 +24,10 @@
 #include "cpudata.h"
 #include "imgui_internal.h"
 //#include "Colors.h"
-
+std::string ConsolePut(std::string data) {
+    std::cout << data << std::endl;
+    return "";
+}
 #pragma comment (lib , "Urlmon.lib")
 
 #pragma once
@@ -83,15 +86,17 @@ struct PerfomanceData {
 
 class cpudata {
 public:
+    int64_t fcpu_data = GetProcessorSpeed();
     std::nano cpu_load;
     std::string fNUMANodes = std::to_string(dDataCPU(1));
     std::string fPhysNumberPackages = std::to_string(dDataCPU(2));
     std::string fCPUCores = std::to_string(dDataCPU(3));
     std::string fCPULogicalCores = std::to_string(dDataCPU(4));
-    std::string fL1CacheSize = std::to_string(dDataCPU(5));
+    std::string fL3CacheSize = std::to_string(dDataCPU(5));
     std::string fL2CacheSize = std::to_string(dDataCPU(6));
-    std::string fL3CacheSize = std::to_string(dDataCPU(7));
+    std::string fL1CacheSize = std::to_string(dDataCPU(7));
     std::string fCPULoadPercent;
+    std::string fCPUSpeed = std::to_string(fcpu_data) + " Mhz";
 };
 struct MemoryData {
     int64_t dwLenA = (fMemStatus(0));
@@ -119,13 +124,13 @@ public:
     }
 };
 // Simple helper function to load an image into a OpenGL texture with common settings
-
 PerfomanceData sInfo;
 MemoryData mInfo;
 strData ByteTransfer;
 cpudata *CPU = new cpudata;
 //
 std::string strArray;
+
 //fA_int2str(sInfo.CommitLimit,&strArray);
 //
 //
@@ -260,6 +265,35 @@ int main(int, char** argv)
     bool main_logo = true;
     bool done = false;
     std::cout << "[JE_ENGINE] Main Frame Loaded!!" << std::endl;
+    ConsolePut("---------------------------------\n::: CPU INFO :::");
+    ConsolePut(("CPU:" + dCPUBrandString).c_str());
+    ConsolePut(("NUMA Nodes:" + CPU->fNUMANodes).c_str());
+    ConsolePut(("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
+    ConsolePut(("CPU cores:" + CPU->fCPUCores).c_str());
+    ConsolePut(("Logical processors:" + CPU->fCPULogicalCores).c_str());
+    ConsolePut(("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
+    ConsolePut(("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
+    ConsolePut(("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
+    ConsolePut("---------------------------------\n::: GPU :::");
+    ConsolePut(("GPU:" + (fD_gpuModel)).c_str());
+    ConsolePut(("GPU GL:" + (fD_gpuGLVer)).c_str());
+    ConsolePut("---------------------------------\n::: PERFOMANCE INFO :::");
+    ConsolePut(("Commit Limit:" + (fCommitLimit)).c_str());
+    ConsolePut(("Commit Peak:" + (fCommitPeak)).c_str());
+    ConsolePut(("Commit Total:" + (fCommitTotal)).c_str());
+    ConsolePut(("Kernel Non paged:" + (fKernelNonpaged)).c_str());
+    ConsolePut(("Kernel Paged:" + (fKernelPaged)).c_str());
+    ConsolePut(("Kernel Total:" + (fKernelTotal)).c_str());
+    ConsolePut(("Page Size:" + (fPageSize)).c_str());
+    ConsolePut(("Physical Available:" + (fPhysicalAvailable)).c_str());
+    ConsolePut(("Physical Total:" + (fPhysicalTotal)).c_str());
+    ConsolePut(("Process Count:" + (fProcessCount)).c_str());
+    ConsolePut(("System Cache:" + (fSystemCache)).c_str());
+    ConsolePut(("Thread Count:" + (fThreadCount)).c_str());
+    ConsolePut("---------------------------------\n::: MEMORY INFO :::");
+    ConsolePut(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
+    ConsolePut(("Free Memory:" + (fullAvailPhys)).c_str());
+    ConsolePut(("Total Memory:" + (fullTotalPhys)).c_str());
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
@@ -361,8 +395,10 @@ int main(int, char** argv)
        static int64_t uLexit = 0;
        static bool exitWindow = false;
        ImU32 col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
+
         if (bSwitchBool) {
             if (main_logo) {
+                ConsolePut("INFO: Main Frame Open");
                 JEApp.ClearFreeMemory();
                 ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
                 ImGui::SetWindowSize(ImVec2(498.0f, 898.0f));
@@ -374,6 +410,7 @@ int main(int, char** argv)
                 if (!loadingWindow) {
                     if (!exitWindow)
                     {
+                        ConsolePut("INFO: Loading no Open");
                         ImGui::SetCursorPosX(133);
                         ImGui::Text("System Hardware info Test");
                         ImGui::SetCursorPosX(133);
@@ -389,6 +426,7 @@ int main(int, char** argv)
                     }
                 }
                 if (exitWindow) {
+                    ConsolePut("INFO: Exiting");
                     loadingWindow = false;
                     main_logo = true;
                     uLexit++;
@@ -399,11 +437,12 @@ int main(int, char** argv)
                     ImGui::SetCursorPos(ImVec2(233, 299));
                     ImGui::Spinner("Loading data", 20, 4, col);
                     if (uLexit == 100) {
+                        ClearMemoryAddress();
                         exit(0);
                     }
                 }
                 if (loadingWindow) {
-   
+                    ConsolePut("INFO: Loading Open");
                     uLoad++;
                     ImGui::SetCursorPos(ImVec2(233, 269));
                     ImGui::Spinner("Loading data", 20, 4, col);
@@ -433,10 +472,13 @@ int main(int, char** argv)
                 main_logo = true;
                 uLoad = 0;
             }
+            
+            //
             ImGui::SetWindowPos(ImVec2(-3, -2));
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: CPU INFO :::");
             ImGui::Text(("CPU:" + dCPUBrandString).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU Speed:" + CPU->fCPUSpeed).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());

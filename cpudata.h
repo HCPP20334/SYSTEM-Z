@@ -11,7 +11,30 @@
 #include <tchar.h>
 #include "Colors.h"
 #include <psapi.h>
+#include <vector>
+#include <intrin.h>
 
+#pragma intrinsic(__rdtsc)
+struct CPUInfo { float dCPUSpeedMHz; };
+CPUInfo* pInfo = new CPUInfo;
+int64_t ClearMemoryAddress() {
+    delete pInfo;
+    return 0;
+}
+int64_t GetProcessorSpeed()
+{
+    LARGE_INTEGER qwWait, qwStart, qwCurrent;
+    QueryPerformanceCounter(&qwStart);
+    QueryPerformanceFrequency(&qwWait);
+    qwWait.QuadPart >>= 5;
+    unsigned __int64 Start = __rdtsc();
+    do
+    {
+        QueryPerformanceCounter(&qwCurrent);
+    } while (qwCurrent.QuadPart - qwStart.QuadPart < qwWait.QuadPart);
+    pInfo->dCPUSpeedMHz = ((__rdtsc() - Start) << 5) / 1000000.0;
+    return pInfo->dCPUSpeedMHz;
+}
 char fDataVRAMUses()// Not Correct Work Function !!! Check Sym VRAM to Current Program //
 {
     char* Address = (char*)((void*)0xB800);
