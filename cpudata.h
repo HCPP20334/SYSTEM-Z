@@ -9,13 +9,12 @@
 #include <malloc.h>    
 #include <stdio.h>
 #include <tchar.h>
-#include "Colors.h"
 #include <psapi.h>
 #include <vector>
 #include <intrin.h>
 
 #pragma intrinsic(__rdtsc)
-struct CPUInfo { float dCPUSpeedMHz; };
+class CPUInfo {public: float dCPUSpeedMHz; };
 CPUInfo* pInfo = new CPUInfo;
 int64_t ClearMemoryAddress() {
     delete pInfo;

@@ -23,6 +23,7 @@
 #include "stb_image.h"
 #include "cpudata.h"
 #include "imgui_internal.h"
+#include "gpudata.h"
 //#include "Colors.h"
 std::string ConsolePut(std::string data) {
     std::cout << data << std::endl;
@@ -158,7 +159,8 @@ static std::string fullAvailVirtual = std::to_string((int64_t)mInfo.ullAvailVirt
 static std::string fullTotalPageFile = std::to_string((int64_t)mInfo.ullTotalPageFile) + "GB";
 static std::string fullTotalPhys = std::to_string((int64_t)mInfo.ullTotalPhys) + "GB";
 static std::string fullTotalVirtual = std::to_string((int64_t)mInfo.ullTotalVirtual) + "GB";
-
+//
+//
 //
 //static std::string fTime = (std::to_string(tInfo.Hour) + ":" + std::to_string(tInfo.Min) + ":" + std::to_string(tInfo.Sec));
 // Data stored per platform window
@@ -319,9 +321,12 @@ int main(int, char** argv)
         ImGui::NewFrame();
         {
             bool fJEFrame = true;
+            char intBuffer;
+            int64_t a = 555;
+            intBuffer = (char)a;
             // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
             std::exception* d;
-            int64_t a, b;
+            
             //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
             //  ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
                   // Create a window called "Hello, world!" and append into it.
@@ -393,14 +398,29 @@ int main(int, char** argv)
        static  bool loadingWindow = false;
        static int64_t uLoad = 0;
        static int64_t uLexit = 0;
+       static uint64_t ldColorSpinner = 0;
        static bool exitWindow = false;
-       ImU32 col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
+       ImU32 col = 0;
 
         if (bSwitchBool) {
             if (main_logo) {
+
                 ConsolePut("INFO: Main Frame Open");
                 JEApp.ClearFreeMemory();
                 ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+                ldColorSpinner++;
+                if (ldColorSpinner >= 0) {
+                    col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
+                }
+                if (ldColorSpinner >= 3) {
+                    col = ImGui::GetColorU32(ImVec4(0.20f, 0.60f, 1.0f, 1.0f));
+                }
+                if (ldColorSpinner >= 6) {
+                    col = ImGui::GetColorU32(ImVec4(0.50f, 0, 1.0f, 1.0f));
+                }
+                if (ldColorSpinner > 6) {
+                    ldColorSpinner = 0;
+                }
                 ImGui::SetWindowSize(ImVec2(498.0f, 898.0f));
                 ImGui::SetWindowPos(ImVec2(-2, 1));
                 ImGui::SetCursorPos(ImVec2(103, 179));
@@ -472,7 +492,14 @@ int main(int, char** argv)
                 main_logo = true;
                 uLoad = 0;
             }
-            
+            static std::string gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
+            static std::string gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
+            static std::string gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024) + "MB";
+            static std::string gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024) + "MB";
+            static std::string gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
+            static std::string gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
+            static std::string gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
+            static std::string gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth);
             //
             ImGui::SetWindowPos(ImVec2(-3, -2));
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: CPU INFO :::");
@@ -486,16 +513,13 @@ int main(int, char** argv)
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: GPU :::");
-            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
-            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());  ImGui::Text(("gpuNumberCUs:" + gpuNumberCUs).c_str());
+            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());  ImGui::Text(("gpuNumberROPs:" + gpuNumberROPs).c_str());
+            ImGui::Text(("gpuClock:" + gpuCoreClock).c_str()); ImGui::Text(("gpuNumberWGPs:" + gpuNumberWGPs).c_str());
+            ImGui::Text(("gpuMemLocal:" + gpuLocalMemory).c_str()); ImGui::Text(("gpuMemoryBandwidth:" + gpuMemoryBandwidth).c_str());
+            ImGui::Text(("gpuMemShared:" + gpuSharedMemory).c_str());
+            ImGui::Text(("gpuMemClock:" + gpuMemClock).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: PERFOMANCE INFO :::");
-            ImGui::Text(("Commit Limit:" + (fCommitLimit)).c_str());
-            ImGui::Text(("Commit Peak:" + (fCommitPeak)).c_str());
-            ImGui::Text(("Commit Total:" + (fCommitTotal)).c_str());
-            ImGui::Text(("Kernel Non paged:" + (fKernelNonpaged)).c_str());
-            ImGui::Text(("Kernel Paged:" + (fKernelPaged)).c_str());
-            ImGui::Text(("Kernel Total:" + (fKernelTotal)).c_str());
-            ImGui::Text(("Page Size:" + (fPageSize)).c_str());
             ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
             ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
             ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
