@@ -6,7 +6,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <GL/GL.h>
 #include <tchar.h>
 #include <string>
 //#include "JoyStick.h"
@@ -24,7 +23,8 @@
 #include "cpudata.h"
 #include "imgui_internal.h"
 #include "gpudata.h"
-//#include "Colors.h"
+//typedef int int128_t __attribute__((mode(TI)));
+//typedef unsigned int uint128_t __attribute__((mode(TI)));
 std::string ConsolePut(std::string data) {
     std::cout << data << std::endl;
     return "";
@@ -96,6 +96,7 @@ public:
     std::string fL3CacheSize = std::to_string(dDataCPU(5));
     std::string fL2CacheSize = std::to_string(dDataCPU(6));
     std::string fL1CacheSize = std::to_string(dDataCPU(7));
+    std::string fL4CacheSize = std::to_string(dDataCPU(8));
     std::string fCPULoadPercent;
     std::string fCPUSpeed = std::to_string(fcpu_data) + " Mhz";
 };
@@ -134,7 +135,7 @@ std::string strArray;
 
 //fA_int2str(sInfo.CommitLimit,&strArray);
 //
-//
+//..
 float64_t g = 0;
 static std::string fCommitLimit = std::to_string((int64_t)sInfo.CommitLimit)+ " Bytes";
 static std::string fCommitPeak = std::to_string((int64_t)sInfo.CommitPeak)+ " Bytes";
@@ -181,9 +182,10 @@ void CleanupDeviceWGL(HWND hWnd, WGL_WindowData* data);
 void ResetDeviceWGL();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-
 int main(int, char** argv)
 {
+  
+   // AGPU->agsCheck();
     //ByteTransfer.int2str(123, &strArray);
     ByteTransfer.int642str(13, &strArray);
     g = 1,3333;
@@ -197,6 +199,7 @@ int main(int, char** argv)
     HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"System-Z 1.0(release) OpenGL3.3", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW | WS_EX_NOPARENTNOTIFY, 100, 80, 500, 900, nullptr, nullptr, wc.hInstance, nullptr);
     ::SetWindowLongA(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SIZEBOX);
     // Initialize OpenGL
+    AGPU->hwnd = hwnd;
     if (!CreateDeviceWGL(hwnd, &g_MainWindow))
     {
         CleanupDeviceWGL(hwnd, &g_MainWindow);
@@ -227,7 +230,6 @@ int main(int, char** argv)
     io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
     ImFont* font40 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
     ImFont* font60 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 60.0f);
-    std::cout << "[JE_ENGINE] Loaded Font WhiteRabbit.ttf" << std::endl;
     struct GPU_DATA {
         std::string E_Brand = (const char*)glGetString(GL_VENDOR);
         std::string E_Model = (const char*)glGetString(GL_RENDERER);
@@ -237,12 +239,11 @@ int main(int, char** argv)
     std::string fD_gpuBrand = GPU->E_Brand;
     std::string fD_gpuModel = GPU->E_Model;
     std::string fD_gpuGLVer = GPU->E_GLVer;
-    std::cout << "[JE_ENGINE] OpenGL Driver Loaded" << std::endl;
     //SetColorAMD64(240);
-    std::cout << "" << std::endl;
-    std::cout << "" << "OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "" << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "" << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    
+    ConsolePutColored(("OpenGL Vendor: " + fD_gpuBrand).c_str(), 240);
+        ConsolePutColored(("OpenGL Renderer: " + fD_gpuModel),240);
+            ConsolePutColored(("OpenGL Version: " + fD_gpuGLVer), 240);
     // std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "" << std::endl;
     int CPUInfo[4] = { -1 };
@@ -273,9 +274,9 @@ int main(int, char** argv)
     ConsolePut(("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
     ConsolePut(("CPU cores:" + CPU->fCPUCores).c_str());
     ConsolePut(("Logical processors:" + CPU->fCPULogicalCores).c_str());
-    ConsolePut(("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
-    ConsolePut(("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
-    ConsolePut(("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
+    ConsolePut(("L1 Cache:(not Correctly)" + CPU->fL1CacheSize + " MB").c_str());
+    ConsolePut(("L2 Cache:(not Correctly)" + CPU->fL2CacheSize + " MB").c_str());
+    ConsolePut(("L3 Cache:(not Correctly)" + CPU->fL3CacheSize + " MB").c_str());
     ConsolePut("---------------------------------\n::: GPU :::");
     ConsolePut(("GPU:" + (fD_gpuModel)).c_str());
     ConsolePut(("GPU GL:" + (fD_gpuGLVer)).c_str());
@@ -405,7 +406,7 @@ int main(int, char** argv)
         if (bSwitchBool) {
             if (main_logo) {
 
-                ConsolePut("INFO: Main Frame Open");
+               // ConsolePut("INFO: Main Frame Open");
                 JEApp.ClearFreeMemory();
                 ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
                 ldColorSpinner++;
@@ -430,7 +431,11 @@ int main(int, char** argv)
                 if (!loadingWindow) {
                     if (!exitWindow)
                     {
-                        ConsolePut("INFO: Loading no Open");
+                       // ConsolePut("INFO: Loading no Open");
+                        ImGui::SetCursorPosX(83);
+                        ImGui::Text("used AMD_AGS_x64 (C++20) (Work Only AMD GPU)");
+                        ImGui::SetCursorPosX(103);
+                        ImGui::TextColored(ImVec4(1.0f, 0, 0.50f, 1.0f), "(Full GPU Info only AMD GPU)");
                         ImGui::SetCursorPosX(133);
                         ImGui::Text("System Hardware info Test");
                         ImGui::SetCursorPosX(133);
@@ -441,12 +446,13 @@ int main(int, char** argv)
                         ImGui::Text("Created by HCPP");
                         ImGui::SetCursorPosX(133);
                         if (ImGui::Button("START", ImVec2(150.0f, 30.0f))) {
+                            AGPU->agsCheck();
                             loadingWindow = true;
                         }
                     }
                 }
                 if (exitWindow) {
-                    ConsolePut("INFO: Exiting");
+                    //ConsolePut("INFO: Exiting");
                     loadingWindow = false;
                     main_logo = true;
                     uLexit++;
@@ -462,7 +468,7 @@ int main(int, char** argv)
                     }
                 }
                 if (loadingWindow) {
-                    ConsolePut("INFO: Loading Open");
+                   // ConsolePut("INFO: Loading Open");
                     uLoad++;
                     ImGui::SetCursorPos(ImVec2(233, 269));
                     ImGui::Spinner("Loading data", 20, 4, col);
@@ -478,12 +484,14 @@ int main(int, char** argv)
             loadingWindow = false;
             JEApp.ClearFreeMemory();
             ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-            ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024)) + ": MB").c_str());
+            ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024))).c_str());
             ImGui::SameLine();
             if (!exitWindow) {
             if (ImGui::Button("Crash", ImVec2(150.0f, 30.0f))) {
+                //code = AGS_FAILURE;
+              //  AGPU->agsCheck();
                 exitWindow = true;
-                main_logo = true;
+               main_logo = true;
                 
             }
             }
@@ -492,15 +500,27 @@ int main(int, char** argv)
                 main_logo = true;
                 uLoad = 0;
             }
-            static std::string gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
-            static std::string gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
-            static std::string gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024) + "MB";
-            static std::string gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024) + "MB";
-            static std::string gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
-            static std::string gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
-            static std::string gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
-            static std::string gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth);
-            //
+         
+            static std::string gpuCoreClock;
+            static std::string gpuMemClock;
+            static std::string gpuLocalMemory;
+            static std::string gpuSharedMemory;
+            static std::string gpuNumberCUs;
+            static std::string gpuNumberROPs;
+            static std::string gpuNumberWGPs;
+            static std::string gpuMemoryBandwidth;
+            static std::string gpuTeraFlopsOffset;
+            if (AGPU->GPUNotAMD) {
+                gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
+                gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
+                gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024) + "MB";
+                gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024) + "MB";
+                gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
+                gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
+                gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
+                gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth) + " GB/s";
+                gpuTeraFlopsOffset = std::to_string(AGPU->GPUTeraFlops) + " TFlops";
+            }
             ImGui::SetWindowPos(ImVec2(-3, -2));
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: CPU INFO :::");
             ImGui::Text(("CPU:" + dCPUBrandString).c_str());
@@ -509,17 +529,28 @@ int main(int, char** argv)
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
+            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
+            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
+            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
+           // ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L4 Cache:" + CPU->fL4CacheSize + " MB").c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: GPU :::");
-            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());  ImGui::Text(("gpuNumberCUs:" + gpuNumberCUs).c_str());
-            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());  ImGui::Text(("gpuNumberROPs:" + gpuNumberROPs).c_str());
-            ImGui::Text(("gpuClock:" + gpuCoreClock).c_str()); ImGui::Text(("gpuNumberWGPs:" + gpuNumberWGPs).c_str());
-            ImGui::Text(("gpuMemLocal:" + gpuLocalMemory).c_str()); ImGui::Text(("gpuMemoryBandwidth:" + gpuMemoryBandwidth).c_str());
-            ImGui::Text(("gpuMemShared:" + gpuSharedMemory).c_str());
-            ImGui::Text(("gpuMemClock:" + gpuMemClock).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: PERFOMANCE INFO :::");
+            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
+            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+            if (!AGPU->GPUNotAMD) {
+                ImGui::Text("You GPU not Supported!! Error: gpuStack:%p",&gpuInfo.devices[gpuIndex]);
+            }
+            if (AGPU->GPUNotAMD) {
+                ImGui::Text(("gpuNumberCUs:" + gpuNumberCUs).c_str());
+                ImGui::Text(("gpuNumberROPs:" + gpuNumberROPs).c_str());
+                ImGui::Text(("gpuClock:" + gpuCoreClock).c_str());
+                ImGui::Text(("gpuNumberWGPs:" + gpuNumberWGPs).c_str());
+                ImGui::Text(("gpuMemLocal:" + gpuLocalMemory).c_str());
+                ImGui::Text(("gpuMemoryBandwidth:" + gpuMemoryBandwidth).c_str());
+                ImGui::Text(("gpuMemShared:" + gpuSharedMemory).c_str());
+                ImGui::Text(("gpuMemClock:" + gpuMemClock).c_str());
+                ImGui::Text(("gpuTFlopsOffset:" + gpuTeraFlopsOffset).c_str());
+            }
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f)," ----------------------------\n::: PERFOMANCE INFO :: : ");
             ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
             ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
             ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
