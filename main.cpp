@@ -1,4 +1,5 @@
 ﻿
+
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
@@ -6,23 +7,29 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <GL/GL.h>
 #include <tchar.h>
 #include <string>
-//#include "JoyStick.h"
+#include "JoyStick.h"
 #include <iostream>
 #include <conio.h>
-#include <fstream>
-#include <string>
-#include <Psapi.h>
-#include <urlmon.h>
 #include "dSys.h"
+#include <fstream>
+#include <Psapi.h>
+#include <urlmon.h>//
 #include <clocale>
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
+#include "Colors.h"
+#include <unordered_map>
+#include <cstdarg>
+#include "imgui_internal.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "cpudata.h"
-#include "imgui_internal.h"
 #include "gpudata.h"
+#include <chrono>
+using namespace chrono;
 //typedef int int128_t __attribute__((mode(TI)));
 //typedef unsigned int uint128_t __attribute__((mode(TI)));
 std::string ConsolePut(std::string data) {
@@ -163,6 +170,13 @@ static std::string fullTotalVirtual = std::to_string((int64_t)mInfo.ullTotalVirt
 //
 //
 //
+static bool fCBenchMemory = false;
+auto write_timeOut = NULL;
+double write_speedOut = 0;
+auto read_timeOut = 0;
+double read_speedOut = 0;
+bool MemoryTestFrame = false;
+int fMallocMemoryOffset = 5;
 //static std::string fTime = (std::to_string(tInfo.Hour) + ":" + std::to_string(tInfo.Min) + ":" + std::to_string(tInfo.Sec));
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
@@ -323,14 +337,7 @@ int main(int, char** argv)
         {
             bool fJEFrame = true;
             char intBuffer;
-            int64_t a = 555;
-            intBuffer = (char)a;
-            // std::cout << "[JE_ENGINE] Frame Cra" << std::endl;
-            std::exception* d;
             
-            //  std::cout << "ADDR:" << &d << "->" << d << std::endl;
-            //  ImGui::Begin("\tJE x64_OpenGL3_SSE4.2 C++20",&fJEFrame, ImGuiWindowFlags_NoCollapse + ImGuiWindowFlags_NoTitleBar);  
-                  // Create a window called "Hello, world!" and append into it.
             ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
             ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
             JEApp.ClearFreeMemory();
@@ -422,7 +429,7 @@ int main(int, char** argv)
                 if (ldColorSpinner > 6) {
                     ldColorSpinner = 0;
                 }
-                ImGui::SetWindowSize(ImVec2(498.0f, 898.0f));
+                ImGui::SetWindowSize(ImVec2(498.0f, 1098.0f));
                 ImGui::SetWindowPos(ImVec2(-2, 1));
                 ImGui::SetCursorPos(ImVec2(103, 179));
                 ImGui::PushFont(font60);
@@ -481,6 +488,7 @@ int main(int, char** argv)
             ImGui::End();
         }
         if (!main_logo) {
+            
             loadingWindow = false;
             JEApp.ClearFreeMemory();
             ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
@@ -510,6 +518,36 @@ int main(int, char** argv)
             static std::string gpuNumberWGPs;
             static std::string gpuMemoryBandwidth;
             static std::string gpuTeraFlopsOffset;
+            //
+            static uint64_t fM_cpuCount = 0;
+            static uint64_t fM_randSeed = 0;
+            static uint64_t fM_score = 0;
+            //
+            std::string fM_strBuffer;
+            std::string fM_CharsBuffer = "1234567890-=qwertyuiop[]asdfgghjkl;'zxcvbnmm,,./QWERTYUIOP{}ASDGHJKL:ZXCVBNM<>";
+            
+            static bool bCPU_Bench = false;
+            static bool hashGenStart = false;
+            static double endHashTime2;
+            ImGui::Text("CPU Hash Bench");
+            if (ImGui::Button("Bench")) {
+                hashGenStart = true;
+            }
+                if (hashGenStart) {
+                    srand(time(0));
+                    auto t0 = high_resolution_clock::now();
+                    for (uint64_t chk = 0; chk <= 3000000; chk++) {
+                        fM_strBuffer += fM_CharsBuffer[rand() % fM_CharsBuffer.size()];
+                    }
+
+                    auto t1 = high_resolution_clock::now();
+                    double endHashTime = duration_cast<milliseconds>(t1 - t0).count();
+                    endHashTime2 = endHashTime;
+                    hashGenStart = false;
+                }
+                ImGui::Text(("BufferSize:" + std::to_string(fM_strBuffer.size())).c_str());
+                ImGui::Text(("Elapset Time to Hash Gen:" + std::to_string(endHashTime2)+" ms").c_str());
+            
             if (AGPU->GPUNotAMD) {
                 gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
                 gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
@@ -529,10 +567,7 @@ int main(int, char** argv)
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
-            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L1 Cache:" + CPU->fL1CacheSize + " MB").c_str());
-            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L2 Cache:" + CPU->fL2CacheSize + " MB").c_str());
-            //ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L3 Cache:" + CPU->fL3CacheSize + " MB").c_str());
-           // ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("L4 Cache:" + CPU->fL4CacheSize + " MB").c_str());
+            
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: GPU :::");
             ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
             ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
@@ -550,16 +585,84 @@ int main(int, char** argv)
                 ImGui::Text(("gpuMemClock:" + gpuMemClock).c_str());
                 ImGui::Text(("gpuTFlopsOffset:" + gpuTeraFlopsOffset).c_str());
             }
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f)," ----------------------------\n::: PERFOMANCE INFO :: : ");
-            ImGui::Text(("Physical Available:" + (fPhysicalAvailable)).c_str());
-            ImGui::Text(("Physical Total:" + (fPhysicalTotal)).c_str());
-            ImGui::Text(("Process Count:" + (fProcessCount)).c_str());
-            ImGui::Text(("System Cache:" + (fSystemCache)).c_str());
-            ImGui::Text(("Thread Count:" + (fThreadCount)).c_str());
+           
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: MEMORY INFO :::");
             ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
             ImGui::Text(("Free Memory:" + (fullAvailPhys)).c_str());
             ImGui::Text(("Total Memory:" + (fullTotalPhys)).c_str());
+            
+                if (ImGui::Button("Bench Memory")) {
+                    fCBenchMemory = true;
+                }
+                ImGui::SameLine();
+                ImGui::Text(("WARNING!! Test used 5GB RAM:" + std::to_string(fMallocMemoryOffset) + "/" + std::to_string(mInfo.ullTotalPhys) + ": GB").c_str());
+                //ImGui::InputInt("(GB)", &fMallocMemoryOffset, 1);
+                if (fMallocMemoryOffset > mInfo.ullTotalPhys) {
+                    MessageBox(hwnd, L"Error:!! Out of Memory!!", L"SYSTEM-Z::Memory Test", 1);
+                    fMallocMemoryOffset = mInfo.ullTotalPhys - 6;
+
+                }
+                ImGui::Text("Write test:"); ImGui::SameLine(); ImGui::Text("  | Read test:");
+                ImGui::Text(("Time: " + std::to_string(write_timeOut) + "ms").c_str()); ImGui::SameLine(); ImGui::Text(("    | Time: " + std::to_string(read_timeOut) + " ms").c_str());
+                ImGui::Text(("Speed: " + std::to_string(write_speedOut) + " GB/s").c_str()); ImGui::SameLine(); ImGui::Text(("| Speed: " + std::to_string(read_speedOut) + " GB/s").c_str());
+   
+            if (fCBenchMemory) {
+              
+                uint64_t buffer_size = (fMallocMemoryOffset * 1024) * 1024 * 1024;
+                const uint64_t GB = 1024 * 1024 * 1024;
+
+                // Выделение памяти
+                uint64_t* buffer = nullptr;
+                try {
+                    buffer = new uint64_t[buffer_size];
+                }
+                catch (const bad_alloc& e) {
+                    ImGui::TextColored(ImVec4(1.0f, 0, 0.40f, 1.0f), "Memory allocation failed: %d", e.what());
+                    MessageBoxA(hwnd, ("Memory allocation failed:\nError:"+std::string(e.what())).c_str(), "SYSTEM-Z::Memory Test", 1);
+                    return EXIT_FAILURE;
+                }
+
+                // Тест записи
+                auto write_start = high_resolution_clock::now();
+                for (uint64_t i = 0; i < buffer_size; i++) {
+                    buffer[i] = static_cast<uint64_t>(i % 256);
+                }
+                auto write_end = high_resolution_clock::now();
+
+                // Тест чтения и проверки
+                auto read_start = high_resolution_clock::now();
+                for (uint64_t i = 0; i < buffer_size; i++) {
+                    if (buffer[i] != static_cast<uint64_t>(i % 256)) {
+                        MessageBoxA(hwnd, ("Memory verification failed at position " + std::to_string(i)).c_str(), "SYSTEM-Z::Memory Test", 1);
+                        cerr << "Memory verification failed at position " << i << endl;
+                        delete[] buffer;
+                        fCBenchMemory = false;
+                        return EXIT_FAILURE;
+                      
+                    }
+                }
+                auto read_end = high_resolution_clock::now();
+
+                // Освобождение памяти
+                delete[] buffer;
+
+                // Расчёт и вывод результатов
+                auto write_time = duration_cast<milliseconds>(write_end - write_start).count();
+                auto read_time = duration_cast<milliseconds>(read_end - read_start).count();
+
+                double write_speed = static_cast<double>(buffer_size) / GB / (write_time / 1000.0);
+                double read_speed = static_cast<double>(buffer_size) / GB / (read_time / 1000.0);
+                //
+                write_timeOut = write_time;
+                read_timeOut = read_time;
+                write_speedOut = write_speed;
+                read_speedOut = read_speed;
+                fCBenchMemory = false;
+               // cout << "Read test:" << endl;
+               // cout << " - Time: " << read_time << " ms" << endl;
+               // cout << " - Speed: " << read_speed << " MB/s" << endl;
+                //fCBenchMemory = false;
+            }
             ImGui::End();
             }
        }
