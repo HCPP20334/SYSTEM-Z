@@ -29,6 +29,7 @@
 #include "cpudata.h"
 #include "gpudata.h"
 #include <chrono>
+#include "MemorySys.h"
 using namespace chrono;
 //typedef int int128_t __attribute__((mode(TI)));
 //typedef unsigned int uint128_t __attribute__((mode(TI)));
@@ -76,6 +77,29 @@ namespace ImGui {
 
         window->DrawList->PathStroke(color, false, thickness);
     }
+    bool InputInt8(const char* label, int8_t* v, int8_t step, int8_t step_fast, ImGuiInputTextFlags flags)
+    {
+        // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use InputText() to parse your own data, if you want to handle prefixes.
+        const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%d";
+        return InputScalar(label, ImGuiDataType_S8, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+    }
+    bool InputInt64(const char* label, int64_t* v, int64_t step, int64_t step_fast, ImGuiInputTextFlags flags)
+    {
+        // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use InputText() to parse your own data, if you want to handle prefixes.
+        const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%d";
+        return InputScalar(label, ImGuiDataType_U64, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+    }
+    bool InputUInt64(const char* label, uint64_t* v, uint64_t step, uint64_t step_fast, ImGuiInputTextFlags flags)
+    {
+        // Hexadecimal input provided as a convenience but the flag name is awkward. Typically you'd use InputText() to parse your own data, if you want to handle prefixes.
+        const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%d";
+        return InputScalar(label, ImGuiDataType_U64, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+    }
+    bool SliderInt64(const char* label, uint64_t* v, uint64_t v_min, uint64_t v_max, const char* format, ImGuiSliderFlags flags)
+    {
+        return SliderScalar(label, ImGuiDataType_U64, v, &v_min, &v_max, format, flags);
+    }
+
 }
 struct PerfomanceData {
     int64_t CommitLimit = (fPerfomanceInfo(1));
@@ -170,13 +194,14 @@ static std::string fullTotalVirtual = std::to_string((int64_t)mInfo.ullTotalVirt
 //
 //
 //
+typedef long double double64_t;
 static bool fCBenchMemory = false;
-auto write_timeOut = NULL;
+auto write_timeOut = 0;
 double write_speedOut = 0;
 auto read_timeOut = 0;
 double read_speedOut = 0;
 bool MemoryTestFrame = false;
-int fMallocMemoryOffset = 5;
+uint64_t fMallocMemoryOffset = 1000;
 //static std::string fTime = (std::to_string(tInfo.Hour) + ":" + std::to_string(tInfo.Min) + ":" + std::to_string(tInfo.Sec));
 // Data stored per platform window
 struct WGL_WindowData { HDC hDC; };
@@ -203,14 +228,15 @@ int main(int, char** argv)
     //ByteTransfer.int2str(123, &strArray);
     ByteTransfer.int642str(13, &strArray);
     g = 1,3333;
-    std::cout << "Test float64_t size:" << sizeof(float64_t) <<"data_test:"<<g << std::endl;
+    double64_t d;
+    std::cout << "Test double64_t size:" << sizeof(d) <<"data_test:"<<g << std::endl;
     ImDrawListSplitter JEApp;
 
     char fInputBuffer;
     ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"System-Z 1.0(release) OpenGL3.3", nullptr };
+    WNDCLASSEXW wc = { sizeof(wc), CS_OWNDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"System-Z 1.1(release) OpenGL3.3", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"System-Z 1.0(release) OpenGL3.3", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW | WS_EX_NOPARENTNOTIFY, 100, 80, 500, 900, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"System-Z 1.1(release) OpenGL3.3", WS_OVERLAPPEDWINDOW | WS_EX_TOOLWINDOW | WS_EX_NOPARENTNOTIFY, 100, 80, 600, 800, nullptr, nullptr, wc.hInstance, nullptr);
     ::SetWindowLongA(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SIZEBOX);
     // Initialize OpenGL
     AGPU->hwnd = hwnd;
@@ -241,9 +267,9 @@ int main(int, char** argv)
 
     ImGui_ImplWin32_InitForOpenGL(hwnd);
     ImGui_ImplOpenGL3_Init();
-    io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 20.0f);//
-    ImFont* font40 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 40.0f);
-    ImFont* font60 = io.Fonts->AddFontFromFileTTF(".\\WhiteRabbit.ttf", 60.0f);
+    io.Fonts->AddFontFromFileTTF(".\\SFMonoRegular.ttf", 18.0f);//
+    ImFont* font40 = io.Fonts->AddFontFromFileTTF(".\\SFMonoRegular.ttf", 30.0f);
+    ImFont* font60 = io.Fonts->AddFontFromFileTTF(".\\SFMonoRegular.ttf", 50.0f);
     struct GPU_DATA {
         std::string E_Brand = (const char*)glGetString(GL_VENDOR);
         std::string E_Model = (const char*)glGetString(GL_RENDERER);
@@ -311,6 +337,7 @@ int main(int, char** argv)
     ConsolePut(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
     ConsolePut(("Free Memory:" + (fullAvailPhys)).c_str());
     ConsolePut(("Total Memory:" + (fullTotalPhys)).c_str());
+    DiskData->hwnd = hwnd;
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
@@ -337,17 +364,14 @@ int main(int, char** argv)
         {
             bool fJEFrame = true;
             char intBuffer;
-            
-            ImGui::SetWindowPos(ImVec2(6.0f, 19.0f));
-            ImGui::SetWindowSize(ImVec2(475.0f, 703.0f));
             JEApp.ClearFreeMemory();
             ImGuiStyle& style = ImGui::GetStyle();
             style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
             style.Colors[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
             style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
             style.Colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.10f, 0.85f);
-            style.Colors[ImGuiCol_Border] = ImVec4(0.70f, 0.70f, 0.70f, 0.65f);
-            style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+            style.Colors[ImGuiCol_Border] = ImVec4(0.53f, 0.53f, 0.53f, 1.0f);
+            style.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 0.00f, 0.50f, 0.00f);
             style.Colors[ImGuiCol_FrameBg] = ImVec4(0.00f, 0.00f, 0.01f, 1.00f);
             style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.90f, 0.80f, 0.80f, 0.40f);
             style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.90f, 0.65f, 0.65f, 0.45f);
@@ -360,9 +384,9 @@ int main(int, char** argv)
             style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 0.83f);
             style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.70f, 0.70f, 0.70f, 0.62f);
             style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 0.84f);
-            style.Colors[ImGuiCol_Button] = ImVec4(0.30f, 0.30f, 0.30f, 0.80f);
-            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.50f, 0.69f, 0.99f, 0.68f);
-            style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.80f, 0.50f, 0.50f, 1.00f);
+            style.Colors[ImGuiCol_Button] = ImVec4(0.01f, 0.01f, 0.02f, 0.80f);
+            style.Colors[ImGuiCol_ButtonHovered] = ImVec4(1.0f, 0.0f, .50f, 1.0f);
+            style.Colors[ImGuiCol_ButtonActive] = ImVec4(1.0f, 0.0f, .50f, 1.0f);
             style.Colors[ImGuiCol_Header] = ImVec4(0.30f, 0.69f, 1.00f, 0.53f);
             style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.44f, 0.61f, 0.86f, 1.00f);
             style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.38f, 0.62f, 0.83f, 1.00f);
@@ -375,6 +399,7 @@ int main(int, char** argv)
             style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
             style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
             ImGuiButtonFlags btn_flags = ImGuiButtonFlags_MouseButtonMask_;
+            style.FrameBorderSize = 1;
 
         }
 
@@ -415,7 +440,9 @@ int main(int, char** argv)
 
                // ConsolePut("INFO: Main Frame Open");
                 JEApp.ClearFreeMemory();
-                ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+                ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+               // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
+                ImGui::SetWindowSize(ImVec2(AGPU->wx, AGPU->wy));
                 ldColorSpinner++;
                 if (ldColorSpinner >= 0) {
                     col = ImGui::GetColorU32(ImVec4(0.0f, 1, 0.50f, 1.0f));
@@ -429,11 +456,12 @@ int main(int, char** argv)
                 if (ldColorSpinner > 6) {
                     ldColorSpinner = 0;
                 }
-                ImGui::SetWindowSize(ImVec2(498.0f, 1098.0f));
+                static std::string fGlichText;
+                AGPU->SYSTEM_Z(&fGlichText);
                 ImGui::SetWindowPos(ImVec2(-2, 1));
                 ImGui::SetCursorPos(ImVec2(103, 179));
                 ImGui::PushFont(font60);
-                ImGui::Text("SYSTEM-Z 1.0");
+                ImGui::Text((fGlichText).c_str());
                 ImGui::PopFont();
                 if (!loadingWindow) {
                     if (!exitWindow)
@@ -452,8 +480,9 @@ int main(int, char** argv)
                         ImGui::SetCursorPosX(133);
                         ImGui::Text("Created by HCPP");
                         ImGui::SetCursorPosX(133);
-                        if (ImGui::Button("START", ImVec2(150.0f, 30.0f))) {
+                        if (ImGui::Button("START", ImVec2(250.0f, 30.0f))) {
                             AGPU->agsCheck();
+                            
                             loadingWindow = true;
                         }
                     }
@@ -477,7 +506,9 @@ int main(int, char** argv)
                 if (loadingWindow) {
                    // ConsolePut("INFO: Loading Open");
                     uLoad++;
-                    ImGui::SetCursorPos(ImVec2(233, 269));
+                    ImGui::SetCursorPos(ImVec2(123, 269));
+                    ImGui::Text((AGPU->GPUInitMsg).c_str());
+                    ImGui::SetCursorPos(ImVec2(233, 340));
                     ImGui::Spinner("Loading data", 20, 4, col);
                         if (uLoad == 100) {
                             main_logo = false;
@@ -491,11 +522,12 @@ int main(int, char** argv)
             
             loadingWindow = false;
             JEApp.ClearFreeMemory();
-            ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-            ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024))).c_str());
-            ImGui::SameLine();
+            ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+            //ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024))).c_str());
+           // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
+            ImGui::SetWindowSize(ImVec2(AGPU->wx, AGPU->wy));
             if (!exitWindow) {
-            if (ImGui::Button("Crash", ImVec2(150.0f, 30.0f))) {
+            if (ImGui::Button("EXIT", ImVec2(150.0f, 30.0f))) {
                 //code = AGS_FAILURE;
               //  AGPU->agsCheck();
                 exitWindow = true;
@@ -503,12 +535,23 @@ int main(int, char** argv)
                 
             }
             }
+
+            static bool bCPU_Bench = false;
+            static bool hashGenStart = false;
+            static double endHashTime2;
             ImGui::SameLine();
-            if (ImGui::Button("BACK", ImVec2(150.0f, 30.0f))) {
+            if (ImGui::Button("BACK", ImVec2(100.0f, 30.0f))) {
                 main_logo = true;
                 uLoad = 0;
             }
-         
+            ImGui::SameLine();
+            if (ImGui::Button("Memory Bench", ImVec2(150.0f, 30.0f))) {
+                fCBenchMemory = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("CPU Bench", ImVec2(150.0f, 30.0f))) {
+                hashGenStart = true;
+            }
             static std::string gpuCoreClock;
             static std::string gpuMemClock;
             static std::string gpuLocalMemory;
@@ -525,14 +568,8 @@ int main(int, char** argv)
             //
             std::string fM_strBuffer;
             std::string fM_CharsBuffer = "1234567890-=qwertyuiop[]asdfgghjkl;'zxcvbnmm,,./QWERTYUIOP{}ASDGHJKL:ZXCVBNM<>";
-            
-            static bool bCPU_Bench = false;
-            static bool hashGenStart = false;
-            static double endHashTime2;
-            ImGui::Text("CPU Hash Bench");
-            if (ImGui::Button("Bench")) {
-                hashGenStart = true;
-            }
+
+            ImGui::SeparatorText("CPU Hash Bench");
                 if (hashGenStart) {
                     srand(time(0));
                     auto t0 = high_resolution_clock::now();
@@ -545,70 +582,84 @@ int main(int, char** argv)
                     endHashTime2 = endHashTime;
                     hashGenStart = false;
                 }
-                ImGui::Text(("BufferSize:" + std::to_string(fM_strBuffer.size())).c_str());
-                ImGui::Text(("Elapset Time to Hash Gen:" + std::to_string(endHashTime2)+" ms").c_str());
-            
+                
+                ImGui::Text("Elapset Time to Hash Gen: %.2f ms",endHashTime2);
+                    
             if (AGPU->GPUNotAMD) {
                 gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
                 gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
-                gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024) + "MB";
-                gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024) + "MB";
+                gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024 / 1024) + "GB";
+                gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024 / 1024) + "GB";
                 gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
                 gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
                 gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
                 gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth) + " GB/s";
                 gpuTeraFlopsOffset = std::to_string(AGPU->GPUTeraFlops) + " TFlops";
             }
+            static  uint64_t dsk_count = 0;
             ImGui::SetWindowPos(ImVec2(-3, -2));
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: CPU INFO :::");
+            ImGui::SeparatorText("CPU INFO");
             ImGui::Text(("CPU:" + dCPUBrandString).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU Speed:" + CPU->fCPUSpeed).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU Speed:" + CPU->fCPUSpeed).c_str());
+            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str()); ImGui::SameLine();ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
             ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
-            
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: GPU :::");
-            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str());
+            ImGui::SeparatorText("GPU INFO");
+            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "%.2f GB", AGPU->GPUlocalMemory / 1024 / 1024 / 1024);
             ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
             if (!AGPU->GPUNotAMD) {
                 ImGui::Text("You GPU not Supported!! Error: gpuStack:%p",&gpuInfo.devices[gpuIndex]);
             }
+        
             if (AGPU->GPUNotAMD) {
-                ImGui::Text(("gpuNumberCUs:" + gpuNumberCUs).c_str());
-                ImGui::Text(("gpuNumberROPs:" + gpuNumberROPs).c_str());
-                ImGui::Text(("gpuClock:" + gpuCoreClock).c_str());
-                ImGui::Text(("gpuNumberWGPs:" + gpuNumberWGPs).c_str());
-                ImGui::Text(("gpuMemLocal:" + gpuLocalMemory).c_str());
-                ImGui::Text(("gpuMemoryBandwidth:" + gpuMemoryBandwidth).c_str());
-                ImGui::Text(("gpuMemShared:" + gpuSharedMemory).c_str());
-                ImGui::Text(("gpuMemClock:" + gpuMemClock).c_str());
-                ImGui::Text(("gpuTFlopsOffset:" + gpuTeraFlopsOffset).c_str());
+                ImGui::SeparatorText("Compute Units (Only AMD) AMD_AGS_SDK Metrics)");
+                ImGui::Columns(2, "##GpuData", true);
+                ImGui::Text((" CUs:" + gpuNumberCUs).c_str());
+                ImGui::Text((" ROPs:" + gpuNumberROPs).c_str());
+                ImGui::Text((" Clock:" + gpuCoreClock).c_str());
+                ImGui::Text((" WGPs:" + gpuNumberWGPs).c_str());
+                ImGui::NextColumn();
+                ImGui::Text((" MemoryBandwidth:" + gpuMemoryBandwidth).c_str());
+                ImGui::Text((" Mem Shared:" + gpuSharedMemory).c_str());
+                ImGui::Text((" Mem Clock:" + gpuMemClock).c_str());
+                ImGui::Text((" TFlops:" + gpuTeraFlopsOffset).c_str());
+                ImGui::Columns(1);
             }
-           
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "---------------------------------\n::: MEMORY INFO :::");
+            ImGui::SeparatorText("HDD/SSD Info (not stable work 'crash to bad alloc' )");
+            ImGui::Text("Drives: %d", DiskData->DisksSize);  ImGui::SameLine();
+            ImGui::Text((DiskData->d1).c_str()); ImGui::SameLine();
+            ImGui::Text((DiskData->d0).c_str()); ImGui::SameLine();
+            ImGui::Text((DiskData->d2 + " / " + DiskData->d3).c_str());
+            DiskData->GetInfoDrive(dsk_count);
+           // ImGui::SameLine();
+            if (ImGui::Button("select", ImVec2(80.0f, 50.0f))) {
+                std::cout << "disk_:" << dsk_count << endl;
+                dsk_count++;
+               /// delete[] DiskData->dr0;
+                if (dsk_count >= 3) {
+                    dsk_count = 0;
+                }
+                
+            }
+           // ImGui::Text(DiskData->msg);
+            ImGui::SeparatorText("MEMORY INFO");
             ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
             ImGui::Text(("Free Memory:" + (fullAvailPhys)).c_str());
             ImGui::Text(("Total Memory:" + (fullTotalPhys)).c_str());
             
-                if (ImGui::Button("Bench Memory")) {
-                    fCBenchMemory = true;
-                }
-                ImGui::SameLine();
-                ImGui::Text(("WARNING!! Test used 5GB RAM:" + std::to_string(fMallocMemoryOffset) + "/" + std::to_string(mInfo.ullTotalPhys) + ": GB").c_str());
-                //ImGui::InputInt("(GB)", &fMallocMemoryOffset, 1);
-                if (fMallocMemoryOffset > mInfo.ullTotalPhys) {
-                    MessageBox(hwnd, L"Error:!! Out of Memory!!", L"SYSTEM-Z::Memory Test", 1);
-                    fMallocMemoryOffset = mInfo.ullTotalPhys - 6;
-
-                }
-                ImGui::Text("Write test:"); ImGui::SameLine(); ImGui::Text("  | Read test:");
-                ImGui::Text(("Time: " + std::to_string(write_timeOut) + "ms").c_str()); ImGui::SameLine(); ImGui::Text(("    | Time: " + std::to_string(read_timeOut) + " ms").c_str());
-                ImGui::Text(("Speed: " + std::to_string(write_speedOut) + " GB/s").c_str()); ImGui::SameLine(); ImGui::Text(("| Speed: " + std::to_string(read_speedOut) + " GB/s").c_str());
-   
+                ImGui::SeparatorText("MEMORY BENCH");
+                ImGui::SliderInt64((std::to_string((fMallocMemoryOffset) * 8)+"MB").c_str(), &fMallocMemoryOffset, 1, 5000, "",0);
+                ImGui::Columns(2, "##BenchTests", true);
+                ImGui::Text("Write test:");
+                ImGui::Text("Time: %d ms",write_timeOut);
+                ImGui::Text("Speed:%.2f GB/S", write_speedOut);
+                ImGui::NextColumn();
+                ImGui::Text("Read test:");
+                ImGui::Text("Time:%d ms ", read_timeOut);
+                ImGui::Text("Speed: %.2f GB/S",read_speedOut);
+                ImGui::Columns(1);
             if (fCBenchMemory) {
-              
-                uint64_t buffer_size = (fMallocMemoryOffset * 1024) * 1024 * 1024;
+                MessageBoxA(hwnd, ("[WARNING]The process cannot be stopped\nThe benchmark consumes " + std::string(std::to_string((fMallocMemoryOffset) * 8))+" MB of RAM").c_str(), "SYSTEM-Z::Memory Test", 1);
+                uint64_t buffer_size = (fMallocMemoryOffset) * 1024 * 1024 ;
                 const uint64_t GB = 1024 * 1024 * 1024;
 
                 // Выделение памяти
@@ -623,15 +674,18 @@ int main(int, char** argv)
                 }
 
                 // Тест записи
+               // std::ofstream dumpMemory("MemoryDump.txt");
                 auto write_start = high_resolution_clock::now();
                 for (uint64_t i = 0; i < buffer_size; i++) {
                     buffer[i] = static_cast<uint64_t>(i % 256);
+                   
                 }
                 auto write_end = high_resolution_clock::now();
 
                 // Тест чтения и проверки
                 auto read_start = high_resolution_clock::now();
                 for (uint64_t i = 0; i < buffer_size; i++) {
+
                     if (buffer[i] != static_cast<uint64_t>(i % 256)) {
                         MessageBoxA(hwnd, ("Memory verification failed at position " + std::to_string(i)).c_str(), "SYSTEM-Z::Memory Test", 1);
                         cerr << "Memory verification failed at position " << i << endl;
@@ -645,10 +699,10 @@ int main(int, char** argv)
 
                 // Освобождение памяти
                 delete[] buffer;
-
+                ///dumpMemory.close();
                 // Расчёт и вывод результатов
-                auto write_time = duration_cast<milliseconds>(write_end - write_start).count();
-                auto read_time = duration_cast<milliseconds>(read_end - read_start).count();
+                int64_t write_time = duration_cast<milliseconds>(write_end - write_start).count();
+                int64_t read_time = duration_cast<milliseconds>(read_end - read_start).count();
 
                 double write_speed = static_cast<double>(buffer_size) / GB / (write_time / 1000.0);
                 double read_speed = static_cast<double>(buffer_size) / GB / (read_time / 1000.0);

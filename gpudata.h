@@ -4,7 +4,11 @@
 #include <iostream>
 #include <Windows.h>
 #include <GL/GL.h>
+
 #pragma comment(lib,"amd_ags_x64.lib")
+
+
+
 AGSGPUInfo gpuInfo;
 uint64_t gpuIndex = 0;
 AGSContext* context;
@@ -21,10 +25,15 @@ std::string ConsolePutColored(std::string data, int64_t code) {
     SetConsoleTextAttribute(hStdOut, (WORD)15);
     return "";
 }
+
 class GPU_DATA {
 public:
     HWND hwnd = NULL;
-   uint64_t GPUlocalMemory = 0;
+   uint32_t GPUSMUnits = 0;
+   uint32_t GPUTempOffset = 0;
+   uint32_t GPULoadOffset = 0;
+   //
+   float GPUlocalMemory = 0;
    uint64_t GPUSharedMemory = 0;
    uint64_t GPUCoreClock = 0;
    uint64_t GPUMemoryClock = 0;
@@ -34,22 +43,33 @@ public:
    uint64_t GPUMemoryBandwidth = 0;
    uint64_t GPUTeraFlops = 0;
    std::string AGSInfoText; bool GPUNotAMD;
-
+   std::string GPUInitMsg;
+   int64_t SYSTEM_Z(std::string* outText);
+   uint64_t wx = 600; uint64_t wy = 800;
    bool agsCheck();
 
   
 };
+int64_t GPU_DATA::SYSTEM_Z(std::string *outText) {
+    static int64_t chrs = 0;
+    static int64_t inDelay = 0;
+    static bool bRevertText = 0;
+    std::string fAText[] = { "S|       ","SY|       ","SYS|     ","SYST|      ","SYSTE|     ","SYSTEM|    ","SYSTEM-|   ","SYSTEM-Z   ","SYSTEM-Z 1.0" };
+    inDelay++;
+    if (inDelay >= 15) { if (!bRevertText) { chrs++; } else { chrs--; if (chrs <= 0) { bRevertText = false; } }inDelay = 0; }
+    if (chrs > 7) { bRevertText = true; }
+    *outText = (fAText[chrs]).c_str();
+}
 bool GPU_DATA::agsCheck() {
     AGSReturnCode code = agsInitialize(AGS_CURRENT_VERSION, nullptr, &context, &gpuInfo);
     if ((code) == AGS_FAILURE) {
         colorText(47);
-        std::cout<<"AGS::Init() -> Fatal Error!!" << std::endl;
-        colorText(15);
-       // GPU_DATA_FAKE::GPUNotAMD = false;
+        GPU_DATA::GPUInitMsg = "AGS::Init() -> Fatal Error!!";
+        
     }
     if ((code) == AGS_SUCCESS) {
         colorText(37);
-        std::cout << "Your GPU is AMD!!AGS::Init()->OK" << std::endl;
+        GPU_DATA::GPUInitMsg = "Your GPU is AMD!!AGS::Init()->OK";
         colorText(15);
         AGSInfo = gpuInfo.devices[gpuIndex];
         GPU_DATA::GPUlocalMemory = AGSInfo.localMemoryInBytes;
@@ -66,6 +86,7 @@ bool GPU_DATA::agsCheck() {
         return 0;
     }
 }
-
+uint64_t a = 0;
 GPU_DATA* AGPU = new GPU_DATA;///
+
 

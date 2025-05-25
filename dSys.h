@@ -10,6 +10,20 @@ int64_t fMemStatus(int64_t fMData_0);
 int64_t fLTime(int64_t fLtData);
 int64_t CPUArch();
 std::string fCPUType();
+uint64_t CurrentWindowSizeW(HWND hwndW,uint64_t* wx, uint64_t* hy)
+{
+    RECT desktop;
+    // Get a handle to the desktop window
+    const HWND hDesktop = hwndW;
+    // Get the size of screen to the variable desktop
+    GetWindowRect(hDesktop, &desktop);
+    // The top left corner will have coordinates (0,0)
+    // and the bottom right corner will have coordinates
+    // (horizontal, vertical)
+    *wx = desktop.right;
+    *hy = desktop.bottom;
+    return 1;
+}
 
 /*
  * C++11 MinGW Compiler

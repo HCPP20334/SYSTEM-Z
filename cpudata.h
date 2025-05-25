@@ -1,9 +1,3 @@
-// -- file: fCPUData.h --- 
-// -- CPU Information by HCPP -- 
-// -- For DevC++ join libgdi32.a and libpsapi.a --
-// -- for Visual Studio  use #pragma comment(gdi32.lib); and #pragma comment(psapi.lib);--
-// -- Writtein C++11 , Compiled MinGW GCC 4.9.2 64-bit --
-//------------------------------------------------------------------------------------// 
 
 #include <windows.h>
 #include <malloc.h>    
@@ -34,10 +28,11 @@ int64_t GetProcessorSpeed()
     pInfo->dCPUSpeedMHz = ((__rdtsc() - Start) << 5) / 1000000.0;
     return pInfo->dCPUSpeedMHz;
 }
-char fDataVRAMUses()// Not Correct Work Function !!! Check Sym VRAM to Current Program //
+uint64_t ReadAddressToMemory(int8_t addr, int8_t* outData)// Not Correct Work Function !!! Check Sym VRAM to Current Program //
 {
-    char* Address = (char*)((void*)0xB800);
-    return *Address;
+    *outData = (int8_t)(int8_t*)(addr);
+   // __builtin_frame_address(0);
+    return 0;
 }
 typedef BOOL(WINAPI* LPFN_GLPI)(
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
@@ -74,6 +69,7 @@ int64_t dDataCPU(int64_t fCode)
     DWORD processorL2CacheCount = 0;
     DWORD processorL3CacheCount = 0;
     DWORD processorPackageCount = 0;
+    DWORD processorL4CacheCount = 0;
     DWORD byteOffset = 0;
     PCACHE_DESCRIPTOR Cache;
 
@@ -119,7 +115,7 @@ int64_t dDataCPU(int64_t fCode)
     }
 
     ptr = buffer;
-
+    uint64_t l1offset = 0;
     while (byteOffset + sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) <= returnLength)
     {
         switch (ptr->Relationship)
@@ -139,8 +135,10 @@ int64_t dDataCPU(int64_t fCode)
         case RelationCache:
             // Cache data is in ptr->Cache, one CACHE_DESCRIPTOR structure for each cache. 
             Cache = &ptr->Cache;
+          
             if (Cache->Level == 1)
             {
+              // std::cout << "test size:" << Cache->Size << std::endl;
                 processorL1CacheCount++;
             }
             else if (Cache->Level == 2)
@@ -150,6 +148,10 @@ int64_t dDataCPU(int64_t fCode)
             else if (Cache->Level == 3)
             {
                 processorL3CacheCount++;
+            }
+            else if (Cache->Level == 4)
+            {
+                processorL4CacheCount++;
             }
             break;
 
@@ -207,7 +209,9 @@ int64_t dDataCPU(int64_t fCode)
     {
         return processorL3CacheCount;
     }
-
+    if (fCode == 8) {
+        return processorL4CacheCount;
+    }
     free(buffer);
 
     return 0;
