@@ -281,6 +281,8 @@ int main(int, char** argv)
     std::string fD_gpuGLVer = GPU->E_GLVer;
     //SetColorAMD64(240);
     
+    DriveInfoNavigator driveInfoNavigator;
+
     ConsolePutColored(("OpenGL Vendor: " + fD_gpuBrand).c_str(), 240);
         ConsolePutColored(("OpenGL Renderer: " + fD_gpuModel),240);
             ConsolePutColored(("OpenGL Version: " + fD_gpuGLVer), 240);
@@ -337,7 +339,7 @@ int main(int, char** argv)
     ConsolePut(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
     ConsolePut(("Free Memory:" + (fullAvailPhys)).c_str());
     ConsolePut(("Total Memory:" + (fullTotalPhys)).c_str());
-    DiskData->hwnd = hwnd;
+
     while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
@@ -596,7 +598,7 @@ int main(int, char** argv)
                 gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth) + " GB/s";
                 gpuTeraFlopsOffset = std::to_string(AGPU->GPUTeraFlops) + " TFlops";
             }
-            static  uint64_t dsk_count = 0;
+
             ImGui::SetWindowPos(ImVec2(-3, -2));
             ImGui::SeparatorText("CPU INFO");
             ImGui::Text(("CPU:" + dCPUBrandString).c_str());
@@ -625,21 +627,22 @@ int main(int, char** argv)
                 ImGui::Columns(1);
             }
             ImGui::SeparatorText("HDD/SSD Info (not stable work 'crash to bad alloc' )");
-            ImGui::Text("Drives: %d", DiskData->DisksSize);  ImGui::SameLine();
-            ImGui::Text((DiskData->d1).c_str()); ImGui::SameLine();
-            ImGui::Text((DiskData->d0).c_str()); ImGui::SameLine();
-            ImGui::Text((DiskData->d2 + " / " + DiskData->d3).c_str());
-            DiskData->GetInfoDrive(dsk_count);
+            ImGui::Text("Drives: %d", driveInfoNavigator.totalDrives);  ImGui::SameLine();
+            ImGui::Text((driveInfoNavigator.selectedType).c_str()); ImGui::SameLine();
+            ImGui::Text((driveInfoNavigator.selectedName).c_str()); ImGui::SameLine();
+            ImGui::Text((driveInfoNavigator.selectedTotalSize + " / " + driveInfoNavigator.selectedFreeSpaceSize).c_str());;
            // ImGui::SameLine();
-            if (ImGui::Button("select", ImVec2(80.0f, 50.0f))) {
-                std::cout << "disk_:" << dsk_count << endl;
-                dsk_count++;
-               /// delete[] DiskData->dr0;
-                if (dsk_count >= 3) {
-                    dsk_count = 0;
-                }
-                
+
+            if (ImGui::Button("<", ImVec2(30.0f, 30.0f))) {
+                driveInfoNavigator.Prev();
             }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button(">", ImVec2(30.0f, 30.0f))) {
+                driveInfoNavigator.Next();
+            }
+
            // ImGui::Text(DiskData->msg);
             ImGui::SeparatorText("MEMORY INFO");
             ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
