@@ -5,7 +5,7 @@
 #include <codecvt>
 
 std::wstring utf8_to_utf16(const std::string& str) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	return converter.from_bytes(str);
 }
 
