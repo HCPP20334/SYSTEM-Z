@@ -1,5 +1,4 @@
 ﻿
-
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
@@ -107,10 +106,10 @@ struct PerfomanceData {
     int64_t CommitTotal = (fPerfomanceInfo(3));
     int64_t KernelNonpaged = (fPerfomanceInfo(4));
     int64_t KernelPaged = (fPerfomanceInfo(5));
-    int64_t KernelTotal = (fPerfomanceInfo(6)) ;
-    int64_t PageSize = (fPerfomanceInfo(7)) ;
-    int64_t PhysicalAvailable = (fPerfomanceInfo(8)) ;
-    int64_t PhysicalTotal = (fPerfomanceInfo(9)) ;
+    int64_t KernelTotal = (fPerfomanceInfo(6));
+    int64_t PageSize = (fPerfomanceInfo(7));
+    int64_t PhysicalAvailable = (fPerfomanceInfo(8));
+    int64_t PhysicalTotal = (fPerfomanceInfo(9));
     int64_t ProcessCount = fPerfomanceInfo(10);
     int64_t SystemCache = (fPerfomanceInfo(11));
     int64_t ThreadCount = fPerfomanceInfo(12);
@@ -136,18 +135,18 @@ struct MemoryData {
     int64_t dwMemoryLoad = (fMemStatus(1));
     int64_t ullAvailExtendedVirtual = (fMemStatus(2));
     int64_t ullAvailPageFile = (fMemStatus(3));
-    int64_t ullAvailPhys = (fMemStatus(4)) ;
-    int64_t ullAvailVirtual = (fMemStatus(5)) ;
+    int64_t ullAvailPhys = (fMemStatus(4));
+    int64_t ullAvailVirtual = (fMemStatus(5));
     int64_t ullTotalPageFile = (fMemStatus(6));
     int64_t ullTotalPhys = (fMemStatus(7));
     int64_t ullTotalVirtual = fMemStatus(8);
 };
 typedef double long float64_t;
 class strData {
-   // static int64_t int642str(int64_t integerData, std::string* fM_bufferArrayStr);
-   // static int64_t const_char2str(const char* Data, std::string* fM_bufferArrayStr);
+    // static int64_t int642str(int64_t integerData, std::string* fM_bufferArrayStr);
+    // static int64_t const_char2str(const char* Data, std::string* fM_bufferArrayStr);
 public:
-    static int64_t int642str(int64_t integerData, std::string *fM_bufferArrayStr) {
+    static int64_t int642str(int64_t integerData, std::string* fM_bufferArrayStr) {
         *fM_bufferArrayStr = (std::to_string(integerData)).c_str();
         return 1;
     }
@@ -160,7 +159,7 @@ public:
 PerfomanceData sInfo;
 MemoryData mInfo;
 strData ByteTransfer;
-cpudata *CPU = new cpudata;
+cpudata* CPU = new cpudata;
 //
 std::string strArray;
 
@@ -168,17 +167,17 @@ std::string strArray;
 //
 //..
 float64_t g = 0;
-static std::string fCommitLimit = std::to_string((int64_t)sInfo.CommitLimit)+ " Bytes";
-static std::string fCommitPeak = std::to_string((int64_t)sInfo.CommitPeak)+ " Bytes";
-static std::string fCommitTotal = std::to_string((int64_t)sInfo.CommitTotal)+ " Bytes";
-static std::string fKernelNonpaged = std::to_string((int64_t)sInfo.KernelNonpaged)+ " Bytes";
-static std::string fKernelPaged = std::to_string((int64_t)sInfo.KernelPaged)+ " Bytes";
-static std::string fKernelTotal = std::to_string((int64_t)sInfo.KernelTotal)+ " Bytes";
-static std::string fPageSize = std::to_string((int64_t)sInfo.PageSize)+ " Bytes";
-static std::string fPhysicalAvailable = std::to_string((int64_t)sInfo.PhysicalAvailable)+ " Bytes";
-static std::string fPhysicalTotal = std::to_string((int64_t)sInfo.PhysicalTotal)+ " Bytes";
+static std::string fCommitLimit = std::to_string((int64_t)sInfo.CommitLimit) + " Bytes";
+static std::string fCommitPeak = std::to_string((int64_t)sInfo.CommitPeak) + " Bytes";
+static std::string fCommitTotal = std::to_string((int64_t)sInfo.CommitTotal) + " Bytes";
+static std::string fKernelNonpaged = std::to_string((int64_t)sInfo.KernelNonpaged) + " Bytes";
+static std::string fKernelPaged = std::to_string((int64_t)sInfo.KernelPaged) + " Bytes";
+static std::string fKernelTotal = std::to_string((int64_t)sInfo.KernelTotal) + " Bytes";
+static std::string fPageSize = std::to_string((int64_t)sInfo.PageSize) + " Bytes";
+static std::string fPhysicalAvailable = std::to_string((int64_t)sInfo.PhysicalAvailable) + " Bytes";
+static std::string fPhysicalTotal = std::to_string((int64_t)sInfo.PhysicalTotal) + " Bytes";
 static std::string fProcessCount = std::to_string(sInfo.ProcessCount);
-static std::string fSystemCache = std::to_string((int64_t)sInfo.SystemCache)+ " Bytes";
+static std::string fSystemCache = std::to_string((int64_t)sInfo.SystemCache) + " Bytes";
 static std::string fThreadCount = std::to_string(sInfo.ThreadCount);
 // 
 static std::string fdwLenA = std::to_string((int64_t)mInfo.dwLenA);
@@ -223,13 +222,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 int main(int, char** argv)
 {
-  
-   // AGPU->agsCheck();
-    //ByteTransfer.int2str(123, &strArray);
+
+    // AGPU->agsCheck();
+     //ByteTransfer.int2str(123, &strArray);
     ByteTransfer.int642str(13, &strArray);
-    g = 1,3333;
+    g = 1, 3333;
     double64_t d;
-    std::cout << "Test double64_t size:" << sizeof(d) <<"data_test:"<<g << std::endl;
+    std::cout << "Test double64_t size:" << sizeof(d) << "data_test:" << g << std::endl;
     ImDrawListSplitter JEApp;
 
     char fInputBuffer;
@@ -275,17 +274,17 @@ int main(int, char** argv)
         std::string E_Model = (const char*)glGetString(GL_RENDERER);
         std::string E_GLVer = (const char*)glGetString(GL_VERSION);
     };
-    GPU_DATA *GPU = new GPU_DATA;
+    GPU_DATA* GPU = new GPU_DATA;
     std::string fD_gpuBrand = GPU->E_Brand;
     std::string fD_gpuModel = GPU->E_Model;
     std::string fD_gpuGLVer = GPU->E_GLVer;
     //SetColorAMD64(240);
-    
+
     DriveInfoNavigator driveInfoNavigator;
 
     ConsolePutColored(("OpenGL Vendor: " + fD_gpuBrand).c_str(), 240);
-        ConsolePutColored(("OpenGL Renderer: " + fD_gpuModel),240);
-            ConsolePutColored(("OpenGL Version: " + fD_gpuGLVer), 240);
+    ConsolePutColored(("OpenGL Renderer: " + fD_gpuModel), 240);
+    ConsolePutColored(("OpenGL Version: " + fD_gpuGLVer), 240);
     // std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "" << std::endl;
     int CPUInfo[4] = { -1 };
@@ -430,20 +429,20 @@ int main(int, char** argv)
             // WriteConfigJE << "fJEVsync=false;" << std::endl;
         }
         bool bSwitchBool = true;
-       static  bool loadingWindow = false;
-       static int64_t uLoad = 0;
-       static int64_t uLexit = 0;
-       static uint64_t ldColorSpinner = 0;
-       static bool exitWindow = false;
-       ImU32 col = 0;
+        static  bool loadingWindow = false;
+        static int64_t uLoad = 0;
+        static int64_t uLexit = 0;
+        static uint64_t ldColorSpinner = 0;
+        static bool exitWindow = false;
+        ImU32 col = 0;
 
         if (bSwitchBool) {
             if (main_logo) {
 
-               // ConsolePut("INFO: Main Frame Open");
+                // ConsolePut("INFO: Main Frame Open");
                 JEApp.ClearFreeMemory();
                 ImGui::Begin("LOGO", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-               // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
+                // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
                 ImGui::SetWindowSize(ImVec2(AGPU->wx, AGPU->wy));
                 ldColorSpinner++;
                 if (ldColorSpinner >= 0) {
@@ -468,7 +467,7 @@ int main(int, char** argv)
                 if (!loadingWindow) {
                     if (!exitWindow)
                     {
-                       // ConsolePut("INFO: Loading no Open");
+                        // ConsolePut("INFO: Loading no Open");
                         ImGui::SetCursorPosX(83);
                         ImGui::Text("used AMD_AGS_x64 (C++20) (Work Only AMD GPU)");
                         ImGui::SetCursorPosX(103);
@@ -484,7 +483,7 @@ int main(int, char** argv)
                         ImGui::SetCursorPosX(133);
                         if (ImGui::Button("START", ImVec2(250.0f, 30.0f))) {
                             AGPU->agsCheck();
-                            
+
                             loadingWindow = true;
                         }
                     }
@@ -506,72 +505,72 @@ int main(int, char** argv)
                     }
                 }
                 if (loadingWindow) {
-                   // ConsolePut("INFO: Loading Open");
+                    // ConsolePut("INFO: Loading Open");
                     uLoad++;
                     ImGui::SetCursorPos(ImVec2(123, 269));
                     ImGui::Text((AGPU->GPUInitMsg).c_str());
                     ImGui::SetCursorPos(ImVec2(233, 340));
                     ImGui::Spinner("Loading data", 20, 4, col);
-                        if (uLoad == 100) {
-                            main_logo = false;
-                            loadingWindow = false;
-                        }
+                    if (uLoad == 100) {
+                        main_logo = false;
+                        loadingWindow = false;
+                    }
                 }
-            
-            ImGui::End();
-        }
-        if (!main_logo) {
-            
-            loadingWindow = false;
-            JEApp.ClearFreeMemory();
-            ImGui::Begin("Main Info", &main_logo,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-            //ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024))).c_str());
-           // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
-            ImGui::SetWindowSize(ImVec2(AGPU->wx, AGPU->wy));
-            if (!exitWindow) {
-            if (ImGui::Button("EXIT", ImVec2(150.0f, 30.0f))) {
-                //code = AGS_FAILURE;
-              //  AGPU->agsCheck();
-                exitWindow = true;
-               main_logo = true;
-                
-            }
-            }
 
-            static bool bCPU_Bench = false;
-            static bool hashGenStart = false;
-            static double endHashTime2;
-            ImGui::SameLine();
-            if (ImGui::Button("BACK", ImVec2(100.0f, 30.0f))) {
-                main_logo = true;
-                uLoad = 0;
+                ImGui::End();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Memory Bench", ImVec2(150.0f, 30.0f))) {
-                fCBenchMemory = true;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("CPU Bench", ImVec2(150.0f, 30.0f))) {
-                hashGenStart = true;
-            }
-            static std::string gpuCoreClock;
-            static std::string gpuMemClock;
-            static std::string gpuLocalMemory;
-            static std::string gpuSharedMemory;
-            static std::string gpuNumberCUs;
-            static std::string gpuNumberROPs;
-            static std::string gpuNumberWGPs;
-            static std::string gpuMemoryBandwidth;
-            static std::string gpuTeraFlopsOffset;
-            //
-            static uint64_t fM_cpuCount = 0;
-            static uint64_t fM_randSeed = 0;
-            static uint64_t fM_score = 0;
-            //
-            std::string fM_strBuffer;
-            std::string fM_CharsBuffer = "1234567890-=qwertyuiop[]asdfgghjkl;'zxcvbnmm,,./QWERTYUIOP{}ASDGHJKL:ZXCVBNM<>";
+            if (!main_logo) {
 
-            ImGui::SeparatorText("CPU Hash Bench");
+                loadingWindow = false;
+                JEApp.ClearFreeMemory();
+                ImGui::Begin("Main Info", &main_logo, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+                //ImGui::Text(("mem_usage:" + std::to_string(((fDataMemUsage() / 1024) / 1024))).c_str());
+               // CurrentWindowSizeW(AGPU->hwnd, &AGPU->wx, &AGPU->wy);
+                ImGui::SetWindowSize(ImVec2(AGPU->wx, AGPU->wy));
+                if (!exitWindow) {
+                    if (ImGui::Button("EXIT", ImVec2(150.0f, 30.0f))) {
+                        //code = AGS_FAILURE;
+                      //  AGPU->agsCheck();
+                        exitWindow = true;
+                        main_logo = true;
+
+                    }
+                }
+
+                static bool bCPU_Bench = false;
+                static bool hashGenStart = false;
+                static double endHashTime2;
+                ImGui::SameLine();
+                if (ImGui::Button("BACK", ImVec2(100.0f, 30.0f))) {
+                    main_logo = true;
+                    uLoad = 0;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Memory Bench", ImVec2(150.0f, 30.0f))) {
+                    fCBenchMemory = true;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("CPU Bench", ImVec2(150.0f, 30.0f))) {
+                    hashGenStart = true;
+                }
+                static std::string gpuCoreClock;
+                static std::string gpuMemClock;
+                static std::string gpuLocalMemory;
+                static std::string gpuSharedMemory;
+                static std::string gpuNumberCUs;
+                static std::string gpuNumberROPs;
+                static std::string gpuNumberWGPs;
+                static std::string gpuMemoryBandwidth;
+                static std::string gpuTeraFlopsOffset;
+                //
+                static uint64_t fM_cpuCount = 0;
+                static uint64_t fM_randSeed = 0;
+                static uint64_t fM_score = 0;
+                //
+                std::string fM_strBuffer;
+                std::string fM_CharsBuffer = "1234567890-=qwertyuiop[]asdfgghjkl;'zxcvbnmm,,./QWERTYUIOP{}ASDGHJKL:ZXCVBNM<>";
+
+                ImGui::SeparatorText("CPU Hash Bench");
                 if (hashGenStart) {
                     srand(time(0));
                     auto t0 = high_resolution_clock::now();
@@ -584,148 +583,148 @@ int main(int, char** argv)
                     endHashTime2 = endHashTime;
                     hashGenStart = false;
                 }
-                
-                ImGui::Text("Elapset Time to Hash Gen: %.2f ms",endHashTime2);
-                    
-            if (AGPU->GPUNotAMD) {
-                gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
-                gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
-                gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024 / 1024) + "GB";
-                gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024 / 1024) + "GB";
-                gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
-                gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
-                gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
-                gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth) + " GB/s";
-                gpuTeraFlopsOffset = std::to_string(AGPU->GPUTeraFlops) + " TFlops";
-            }
 
-            ImGui::SetWindowPos(ImVec2(-3, -2));
-            ImGui::SeparatorText("CPU INFO");
-            ImGui::Text(("CPU:" + dCPUBrandString).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU Speed:" + CPU->fCPUSpeed).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str()); ImGui::SameLine();ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
-            ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
-            ImGui::SeparatorText("GPU INFO");
-            ImGui::Text(("GPU:" + (fD_gpuModel)).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "%.2f GB", AGPU->GPUlocalMemory / 1024 / 1024 / 1024);
-            ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
-            if (!AGPU->GPUNotAMD) {
-                ImGui::Text("You GPU not Supported!! Error: gpuStack:%p",&gpuInfo.devices[gpuIndex]);
-            }
-        
-            if (AGPU->GPUNotAMD) {
-                ImGui::SeparatorText("Compute Units (Only AMD) AMD_AGS_SDK Metrics)");
-                ImGui::Columns(2, "##GpuData", true);
-                ImGui::Text((" CUs:" + gpuNumberCUs).c_str());
-                ImGui::Text((" ROPs:" + gpuNumberROPs).c_str());
-                ImGui::Text((" Clock:" + gpuCoreClock).c_str());
-                ImGui::Text((" WGPs:" + gpuNumberWGPs).c_str());
-                ImGui::NextColumn();
-                ImGui::Text((" MemoryBandwidth:" + gpuMemoryBandwidth).c_str());
-                ImGui::Text((" Mem Shared:" + gpuSharedMemory).c_str());
-                ImGui::Text((" Mem Clock:" + gpuMemClock).c_str());
-                ImGui::Text((" TFlops:" + gpuTeraFlopsOffset).c_str());
-                ImGui::Columns(1);
-            }
-            ImGui::SeparatorText("HDD/SSD Info (not stable work 'crash to bad alloc' )");
-            ImGui::Text("Drives: %d", driveInfoNavigator.totalDrives);  ImGui::SameLine();
-            ImGui::Text((driveInfoNavigator.selectedType).c_str()); ImGui::SameLine();
-            ImGui::Text((driveInfoNavigator.selectedName).c_str()); ImGui::SameLine();
-            ImGui::Text((driveInfoNavigator.selectedTotalSize + " / " + driveInfoNavigator.selectedFreeSpaceSize).c_str());;
-           // ImGui::SameLine();
+                ImGui::Text("Elapset Time to Hash Gen: %.2f ms", endHashTime2);
 
-            if (ImGui::Button("<", ImVec2(30.0f, 30.0f))) {
-                driveInfoNavigator.Prev();
-            }
+                if (AGPU->GPUNotAMD) {
+                    gpuCoreClock = std::to_string(AGPU->GPUCoreClock) + ": Mhz";
+                    gpuMemClock = std::to_string(AGPU->GPUMemoryClock) + ": Mhz";
+                    gpuLocalMemory = std::to_string((AGPU->GPUlocalMemory / 1024) / 1024 / 1024) + "GB";
+                    gpuSharedMemory = std::to_string((AGPU->GPUSharedMemory / 1024) / 1024 / 1024) + "GB";
+                    gpuNumberCUs = std::to_string(AGPU->GPUNumberCUs);
+                    gpuNumberROPs = std::to_string(AGPU->GPUNumberROPs);
+                    gpuNumberWGPs = std::to_string(AGPU->GPUNumberWGPs);
+                    gpuMemoryBandwidth = std::to_string(AGPU->GPUMemoryBandwidth) + " GB/s";
+                    gpuTeraFlopsOffset = std::to_string(AGPU->GPUTeraFlops) + " TFlops";
+                }
 
-            ImGui::SameLine();
+                ImGui::SetWindowPos(ImVec2(-3, -2));
+                ImGui::SeparatorText("CPU INFO");
+                ImGui::Text(("CPU:" + dCPUBrandString).c_str());
+                ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("NUMA Nodes:" + CPU->fNUMANodes).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU Speed:" + CPU->fCPUSpeed).c_str());
+                ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Physical CPU packages:" + CPU->fPhysNumberPackages).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("CPU cores:" + CPU->fCPUCores).c_str());
+                ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), ("Logical processors:" + CPU->fCPULogicalCores).c_str());
+                ImGui::SeparatorText("GPU INFO");
+                ImGui::Text(("GPU:" + (fD_gpuModel)).c_str()); ImGui::SameLine(); ImGui::TextColored(ImVec4(0.0f, 1, 0.50f, 1.0f), "%.2f GB", AGPU->GPUlocalMemory / 1024 / 1024 / 1024);
+                ImGui::Text(("GPU GL:" + (fD_gpuGLVer)).c_str());
+                if (!AGPU->GPUNotAMD) {
+                    ImGui::Text("You GPU not Supported!! Error: gpuStack:%p", &gpuInfo.devices[gpuIndex]);
+                }
 
-            if (ImGui::Button(">", ImVec2(30.0f, 30.0f))) {
-                driveInfoNavigator.Next();
-            }
+                if (AGPU->GPUNotAMD) {
+                    ImGui::SeparatorText("Compute Units (Only AMD) AMD_AGS_SDK Metrics)");
+                    ImGui::Columns(2, "##GpuData", true);
+                    ImGui::Text((" CUs:" + gpuNumberCUs).c_str());
+                    ImGui::Text((" ROPs:" + gpuNumberROPs).c_str());
+                    ImGui::Text((" Clock:" + gpuCoreClock).c_str());
+                    ImGui::Text((" WGPs:" + gpuNumberWGPs).c_str());
+                    ImGui::NextColumn();
+                    ImGui::Text((" MemoryBandwidth:" + gpuMemoryBandwidth).c_str());
+                    ImGui::Text((" Mem Shared:" + gpuSharedMemory).c_str());
+                    ImGui::Text((" Mem Clock:" + gpuMemClock).c_str());
+                    ImGui::Text((" TFlops:" + gpuTeraFlopsOffset).c_str());
+                    ImGui::Columns(1);
+                }
+                ImGui::SeparatorText("HDD/SSD Info (fix crash https://github.com/Esewqe' )");
+                ImGui::Text("Drives: %d", driveInfoNavigator.totalDrives);  ImGui::SameLine();
+                ImGui::Text((driveInfoNavigator.selectedType).c_str()); ImGui::SameLine();
+                ImGui::Text((driveInfoNavigator.selectedName).c_str()); ImGui::SameLine();
+                ImGui::Text((driveInfoNavigator.selectedTotalSize + " / " + driveInfoNavigator.selectedFreeSpaceSize).c_str());;
+                // ImGui::SameLine();
 
-           // ImGui::Text(DiskData->msg);
-            ImGui::SeparatorText("MEMORY INFO");
-            ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
-            ImGui::Text(("Free Memory:" + (fullAvailPhys)).c_str());
-            ImGui::Text(("Total Memory:" + (fullTotalPhys)).c_str());
-            
+                if (ImGui::Button("<", ImVec2(30.0f, 30.0f))) {
+                    driveInfoNavigator.Prev();
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button(">", ImVec2(30.0f, 30.0f))) {
+                    driveInfoNavigator.Next();
+                }
+
+                // ImGui::Text(DiskData->msg);
+                ImGui::SeparatorText("MEMORY INFO");
+                ImGui::Text(("Memory Load:" + (fdwMemoryLoad)+"/" + fGBMemoryLoad).c_str());
+                ImGui::Text(("Free Memory:" + (fullAvailPhys)).c_str());
+                ImGui::Text(("Total Memory:" + (fullTotalPhys)).c_str());
+
                 ImGui::SeparatorText("MEMORY BENCH");
-                ImGui::SliderInt64((std::to_string((fMallocMemoryOffset) * 8)+"MB").c_str(), &fMallocMemoryOffset, 1, 5000, "",0);
+                ImGui::SliderInt64((std::to_string((fMallocMemoryOffset) * 8) + "MB").c_str(), &fMallocMemoryOffset, 1, 5000, "", 0);
                 ImGui::Columns(2, "##BenchTests", true);
                 ImGui::Text("Write test:");
-                ImGui::Text("Time: %d ms",write_timeOut);
+                ImGui::Text("Time: %d ms", write_timeOut);
                 ImGui::Text("Speed:%.2f GB/S", write_speedOut);
                 ImGui::NextColumn();
                 ImGui::Text("Read test:");
                 ImGui::Text("Time:%d ms ", read_timeOut);
-                ImGui::Text("Speed: %.2f GB/S",read_speedOut);
+                ImGui::Text("Speed: %.2f GB/S", read_speedOut);
                 ImGui::Columns(1);
-            if (fCBenchMemory) {
-                MessageBoxA(hwnd, ("[WARNING]The process cannot be stopped\nThe benchmark consumes " + std::string(std::to_string((fMallocMemoryOffset) * 8))+" MB of RAM").c_str(), "SYSTEM-Z::Memory Test", 1);
-                uint64_t buffer_size = (fMallocMemoryOffset) * 1024 * 1024 ;
-                const uint64_t GB = 1024 * 1024 * 1024;
+                if (fCBenchMemory) {
+                    MessageBoxA(hwnd, ("[WARNING]The process cannot be stopped\nThe benchmark consumes " + std::string(std::to_string((fMallocMemoryOffset) * 8)) + " MB of RAM").c_str(), "SYSTEM-Z::Memory Test", 1);
+                    uint64_t buffer_size = (fMallocMemoryOffset) * 1024 * 1024;
+                    const uint64_t GB = 1024 * 1024 * 1024;
 
-                // Выделение памяти
-                uint64_t* buffer = nullptr;
-                try {
-                    buffer = new uint64_t[buffer_size];
-                }
-                catch (const bad_alloc& e) {
-                    ImGui::TextColored(ImVec4(1.0f, 0, 0.40f, 1.0f), "Memory allocation failed: %d", e.what());
-                    MessageBoxA(hwnd, ("Memory allocation failed:\nError:"+std::string(e.what())).c_str(), "SYSTEM-Z::Memory Test", 1);
-                    return EXIT_FAILURE;
-                }
-
-                // Тест записи
-               // std::ofstream dumpMemory("MemoryDump.txt");
-                auto write_start = high_resolution_clock::now();
-                for (uint64_t i = 0; i < buffer_size; i++) {
-                    buffer[i] = static_cast<uint64_t>(i % 256);
-                   
-                }
-                auto write_end = high_resolution_clock::now();
-
-                // Тест чтения и проверки
-                auto read_start = high_resolution_clock::now();
-                for (uint64_t i = 0; i < buffer_size; i++) {
-
-                    if (buffer[i] != static_cast<uint64_t>(i % 256)) {
-                        MessageBoxA(hwnd, ("Memory verification failed at position " + std::to_string(i)).c_str(), "SYSTEM-Z::Memory Test", 1);
-                        cerr << "Memory verification failed at position " << i << endl;
-                        delete[] buffer;
-                        fCBenchMemory = false;
-                        return EXIT_FAILURE;
-                      
+                    // Выделение памяти
+                    uint64_t* buffer = nullptr;
+                    try {
+                        buffer = new uint64_t[buffer_size];
                     }
+                    catch (const bad_alloc& e) {
+                        ImGui::TextColored(ImVec4(1.0f, 0, 0.40f, 1.0f), "Memory allocation failed: %d", e.what());
+                        MessageBoxA(hwnd, ("Memory allocation failed:\nError:" + std::string(e.what())).c_str(), "SYSTEM-Z::Memory Test", 1);
+                        return EXIT_FAILURE;
+                    }
+
+                    // Тест записи
+                   // std::ofstream dumpMemory("MemoryDump.txt");
+                    auto write_start = high_resolution_clock::now();
+                    for (uint64_t i = 0; i < buffer_size; i++) {
+                        buffer[i] = static_cast<uint64_t>(i % 256);
+
+                    }
+                    auto write_end = high_resolution_clock::now();
+
+                    // Тест чтения и проверки
+                    auto read_start = high_resolution_clock::now();
+                    for (uint64_t i = 0; i < buffer_size; i++) {
+
+                        if (buffer[i] != static_cast<uint64_t>(i % 256)) {
+                            MessageBoxA(hwnd, ("Memory verification failed at position " + std::to_string(i)).c_str(), "SYSTEM-Z::Memory Test", 1);
+                            cerr << "Memory verification failed at position " << i << endl;
+                            delete[] buffer;
+                            fCBenchMemory = false;
+                            return EXIT_FAILURE;
+
+                        }
+                    }
+                    auto read_end = high_resolution_clock::now();
+
+                    // Освобождение памяти
+                    delete[] buffer;
+                    ///dumpMemory.close();
+                    // Расчёт и вывод результатов
+                    int64_t write_time = duration_cast<milliseconds>(write_end - write_start).count();
+                    int64_t read_time = duration_cast<milliseconds>(read_end - read_start).count();
+
+                    double write_speed = static_cast<double>(buffer_size) / GB / (write_time / 1000.0);
+                    double read_speed = static_cast<double>(buffer_size) / GB / (read_time / 1000.0);
+                    //
+                    write_timeOut = write_time;
+                    read_timeOut = read_time;
+                    write_speedOut = write_speed;
+                    read_speedOut = read_speed;
+                    fCBenchMemory = false;
+                    // cout << "Read test:" << endl;
+                    // cout << " - Time: " << read_time << " ms" << endl;
+                    // cout << " - Speed: " << read_speed << " MB/s" << endl;
+                     //fCBenchMemory = false;
                 }
-                auto read_end = high_resolution_clock::now();
-
-                // Освобождение памяти
-                delete[] buffer;
-                ///dumpMemory.close();
-                // Расчёт и вывод результатов
-                int64_t write_time = duration_cast<milliseconds>(write_end - write_start).count();
-                int64_t read_time = duration_cast<milliseconds>(read_end - read_start).count();
-
-                double write_speed = static_cast<double>(buffer_size) / GB / (write_time / 1000.0);
-                double read_speed = static_cast<double>(buffer_size) / GB / (read_time / 1000.0);
-                //
-                write_timeOut = write_time;
-                read_timeOut = read_time;
-                write_speedOut = write_speed;
-                read_speedOut = read_speed;
-                fCBenchMemory = false;
-               // cout << "Read test:" << endl;
-               // cout << " - Time: " << read_time << " ms" << endl;
-               // cout << " - Speed: " << read_speed << " MB/s" << endl;
-                //fCBenchMemory = false;
+                ImGui::End();
             }
-            ImGui::End();
-            }
-       }
-       // ImGui::End();
+        }
+        // ImGui::End();
 
-// Rendering
+ // Rendering
         ImGui::Render();
         glViewport(0, 0, 400, 800);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
